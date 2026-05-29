@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "GitAI"
+version = "1.0.0"
+description = "AI-powered conventional commit message generator running 100% locally"
+requires-python = ">=3.10"
+dependencies = [
+    "llama-cpp-python[server]>=0.3.23",
+    "httpx>=0.25.0",
+    "psutil>=5.9.0",
+]
+
+[project.scripts]
+gitai = "gitai.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]

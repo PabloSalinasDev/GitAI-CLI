@@ -1,0 +1,23 @@
+# Build
+build/
+dist/
+*.egg-info/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# pipx
+*.egg-link
+
+# OS
+.DS_Store
+Thumbs.db
