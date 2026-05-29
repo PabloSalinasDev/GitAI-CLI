@@ -2,6 +2,7 @@ import httpx
 import sys
 import os
 import time
+import re
 import subprocess
 import psutil
 from gitai.config import MODEL_PATH, PORT
@@ -16,6 +17,40 @@ except ImportError:
 
 _n_threads_optimized = max(1, _physical_cores)
 _n_threads_batch_optimized = max(1, _logical_cores)
+
+def clean_git_diff(raw_diff, max_estimated=2500):
+    """
+    Preprocesses and cleans the git diff. If the size exceeds 2500 characters,
+    transforms it into an emergency structural view of at most 40 lines.
+    """
+    lines = raw_diff.splitlines()
+    clean_lines = []
+    
+    for line in lines:
+        # 1. Skip native git metadata
+        if line.startswith("index ") or line.startswith("similarity index") or line.startswith("rename from") or line.startswith("rename to"):
+            continue
+            
+        # 2. Skip modified lines that are pure comments
+        if re.match(r'^[+-]\s*(#|//|\*|/\*)', line):
+            continue
+            
+        # 3. Skip lines containing only closing/opening characters or pure syntax
+        if re.match(r'^[+-]\s*[{{}}();,.\s]*\s*$', line):
+            continue
+            
+        clean_lines.append(line)
+        
+    filtered_diff = "\n".join(clean_lines)
+    
+    # EMERGENCY STRUCTURAL TRUNCATION
+    if len(filtered_diff) > max_estimated:
+        critical_lines = [l for l in clean_lines if l.startswith("---") or l.startswith("+++") or l.startswith("@@")]
+        if critical_lines:
+            # Cap at 40 lines to guarantee an ultra-fast prompt
+            return "\n".join(critical_lines[:40]) + "\n... [Diff truncated structural view due to large size] ..."
+
+    return filtered_diff
 
 def start_daemon(lang="en"):
     """Starts the llama_cpp server as a silent background process using your optimized parameters."""
@@ -34,7 +69,7 @@ def start_daemon(lang="en"):
         "--model", str(MODEL_PATH),
         "--port", str(PORT),
         "--host", "localhost",
-        "--n_ctx", "3072",
+        "--n_ctx", "2048",
         "--n_batch", "512",
         "--n_ubatch", "512",
         "--n_threads", str(_n_threads_optimized),
@@ -101,7 +136,14 @@ def stop_daemon():
 def generate_commit_message(diff, initial_commit=False, lang="en"):
     """Generates the commit message by communicating via HTTP with the background daemon."""
     
-    max_diff_chars = 6000
+    # Apply smart diff pruning before evaluating its size
+    diff = clean_git_diff(diff)
+    
+    # 1. Adaptive cleanup and pruning
+    diff = clean_git_diff(diff, max_estimated=2500)
+    
+    # 2. Hard physical limit
+    max_diff_chars = 3000
     if len(diff) > max_diff_chars:
         diff = diff[:max_diff_chars] + "\n... [Diff truncated] ..."
     
