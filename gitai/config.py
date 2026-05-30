@@ -7,9 +7,9 @@ from pathlib import Path
 
 
 MODEL_DIR      = Path(os.environ.get("LOCALAPPDATA", ".")) / "gitai" / "models"
-MODEL_FILENAME = "Qwen2.5-Coder-3B-Instruct-Q4_K_M.gguf"
+MODEL_FILENAME = "qwen2.5-coder-7b-instruct-q4_k_m.gguf"
 MODEL_PATH     = MODEL_DIR / MODEL_FILENAME
-MODEL_URL      = "https://huggingface.co/bartowski/Qwen2.5-Coder-3B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-3B-Instruct-Q4_K_M.gguf?download=true"
+MODEL_URL      = "https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf?download=true"
 PORT           = 8089
 
 def get_secure_env():
