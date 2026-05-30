@@ -21,8 +21,11 @@ def get_initial_context():
     for name in ["README.md", "readme.md", "README.txt"]:
         try:
             with open(name, "r", encoding="utf-8", errors="replace") as f:
-                content = f.read(3000)
-                context += f"README.md content:\n{content}\n\n"
+                head_lines = [f.readline() for _ in range(10)]
+                content = "".join(head_lines).strip()
+                
+                if content:
+                    context += f"README.md content:\n{content}\n\n"
                 break
         except FileNotFoundError:
             pass
@@ -38,6 +41,7 @@ def get_initial_context():
     )
     if result.stdout.strip():
         context += f"Files included in this commit:\n{result.stdout.strip()}"
+        
     return context
 
 def get_staged_diff():
