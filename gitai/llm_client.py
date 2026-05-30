@@ -18,37 +18,64 @@ except ImportError:
 _n_threads_optimized = max(1, _physical_cores)
 _n_threads_batch_optimized = max(1, _logical_cores)
 
-def clean_git_diff(raw_diff, max_estimated=2500):
+def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
     """
-    Preprocesses and cleans the git diff. If the size exceeds 2500 characters,
-    transforms it into an emergency structural view of at most 40 lines.
+    Preprocesses, cleans, and filters the git diff to optimize processing speed on CPU.
+    Includes a debug mode to visualize the filtered string and check character economy.
     """
+    initial_char_count = len(raw_diff)
     lines = raw_diff.splitlines()
     clean_lines = []
     
+    # List of binary or lockfile patterns that shouldn't waste CPU cycles
+    ignored_extensions = ('.png', '.jpg', '.jpeg', '.ico', '.pdf', '.lock')
+    
     for line in lines:
-        # 1. Skip native git metadata
+        # 1. Skip native git metadata that provides zero semantic value to the LLM
         if line.startswith("index ") or line.startswith("similarity index") or line.startswith("rename from") or line.startswith("rename to"):
             continue
             
-        # 2. Skip modified lines that are pure comments
+        # 2. Skip binary file notifications or tracking modifications
+        if "Binary files differ" in line or any(ext in line for ext in ignored_extensions):
+            continue
+
+        # 3. Skip pure code comments (Python, JS, C++, etc.)
         if re.match(r'^[+-]\s*(#|//|\*|/\*)', line):
             continue
             
-        # 3. Skip lines containing only closing/opening characters or pure syntax
+        # 4. Skip lines that contain only structural syntax/punctuation (brackets, commas, semicolons)
         if re.match(r'^[+-]\s*[{{}}();,.\s]*\s*$', line):
             continue
             
+        # 5. Skip pure white-space adjustments or empty lines inside the diff
+        if not line.strip() or line in ("+", "-"):
+            continue
+
         clean_lines.append(line)
         
     filtered_diff = "\n".join(clean_lines)
     
-    # EMERGENCY STRUCTURAL TRUNCATION
+    # EMERGENCY STRUCTURAL TRUNCATION (If it's still a monster after filtering)
     if len(filtered_diff) > max_estimated:
         critical_lines = [l for l in clean_lines if l.startswith("---") or l.startswith("+++") or l.startswith("@@")]
         if critical_lines:
-            # Cap at 40 lines to guarantee an ultra-fast prompt
-            return "\n".join(critical_lines[:40]) + "\n... [Diff truncated structural view due to large size] ..."
+            filtered_diff = "\n".join(critical_lines[:40]) + "\n... [Diff truncated structural view due to large size] ..."
+
+    # DEBUG PRINT BLOCK
+    if debug:
+        final_char_count = len(filtered_diff)
+        saved_chars = initial_char_count - final_char_count
+        estimated_seconds_saved = max(0, saved_chars / 100)  # benchmark
+        
+        print("\n" + "="*50)
+        print(" [GITAI DEBUG] FILTERED DIFF TO BE SENT TO LLM:")
+        print("="*50)
+        print(filtered_diff)
+        print("="*50)
+        print(f" Raw Diff Chars: {initial_char_count}")
+        print(f" Clean Diff Chars: {final_char_count}")
+        print(f" Chars Saved: {saved_chars} (~{estimated_seconds_saved:.1f}s saved on CPU)")
+        print("="*50 + "\n")
 
     return filtered_diff
 
@@ -136,11 +163,8 @@ def stop_daemon():
 def generate_commit_message(diff, initial_commit=False, lang="en"):
     """Generates the commit message by communicating via HTTP with the background daemon."""
     
-    # Apply smart diff pruning before evaluating its size
-    diff = clean_git_diff(diff)
-    
     # 1. Adaptive cleanup and pruning
-    diff = clean_git_diff(diff, max_estimated=2500)
+    diff = clean_git_diff(diff, max_estimated=2500, debug=True)
     
     # 2. Hard physical limit
     max_diff_chars = 3000
@@ -160,14 +184,14 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
                     "Este es el COMMIT INICIAL del repositorio. "
                     "Analiza el contenido del README.md y los archivos creados para entender el proyecto. "
                     "Genera un mensaje corto que describa la creación del proyecto. NO uses la frase 'initial commit'.\n"
-                    "Ejemplo: feat: estructura inicial del gestor de inventario local"
+                    "Ejemplo: feat: estructura inicial del [nombre del proyecto]"
                 )
             else:
                 user_instruction = (
                     "Este es el COMMIT INICIAL del repositorio. "
                     "Basándote únicamente en la lista de archivos creados, genera un mensaje corto "
                     "que describa qué tipo de proyecto se está iniciando. NO uses la frase 'initial commit'.\n"
-                    "Ejemplo: chore: estructura base del proyecto CLI"
+                    "Ejemplo: chore: estructura base del [nombre del proyecto]"
                 )
         else:
             if has_readme:
@@ -175,14 +199,14 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
                     "This is the INITIAL COMMIT of the repository. "
                     "Analyze the README.md content and the created files to understand the project's purpose. "
                     "Generate a short message describing the project creation. Do NOT use 'initial commit'.\n"
-                    "Example: feat: initial structure for local inventory manager"
+                    "Example: feat: initial structure for [project name]"
                 )
             else:
                 user_instruction = (
                     "This is the INITIAL COMMIT of the repository. "
                     "Based solely on the list of created files, generate a short one-line message "
                     "describing what kind of project is being initiated. Do NOT use 'initial commit'.\n"
-                    "Example: chore: base repository setup"
+                    "Example: chore: base repository [project name] structure"
                 )
 
     if lang == "es":
@@ -207,7 +231,7 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
             f"- Si el diff muestra principalmente líneas eliminadas (-), interpreta si es una limpieza de código muerto (refactor) o una quita de configuración (chore).\n\n"
             f"REGLAS DE FORMATO:\n"
             f"- Formato: tipo: descripción O tipo(scope): descripción (Usa un scope corto entre paréntesis solo si el diff identifica un módulo claro).\n"
-            f"- El scope va SIEMPRE entre paréntesis y es UNA SOLA palabra corta. NUNCA uses comas dentro del scope.\n"
+            f"- El scope va SIEMPRE entre paréntesis y es UNA SOLA palabra corta. NUNCA uses comas ni extensiones de archivos dentro del scope.\n"
             f"- Todo en minúsculas, sin punto final.\n"
             f"- Devuelve SOLO la línea del commit. No agregues texto introductorio, explicaciones, markdown, bloques de código ni comillas.\n"
             f"- Escribe la respuesta 100% en ESPAÑOL (aunque el código o las variables del diff estén en inglés).\n"
@@ -240,7 +264,7 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
             f"- If the diff shows mainly deleted lines (-), interpret whether it is a cleanup of dead code (refactor) or a removal of configuration (chore).\n\n"
             f"FORMATTING RULES:\n"
             f"- Format: type: description OR type(scope): description (Use a short scope in parentheses only if the diff clearly identifies a specific module).\n"
-            f"- The scope is ALWAYS a single short word in parentheses. NEVER use commas inside the scope.\n"
+            f"- The scope goes ALWAYS in parentheses and is ONE single short word. NEVER use commas or file extensions inside the scope.\n"
             f"- All lowercase, no period at the end.\n"
             f"- Output ONLY the commit message line. No introductions, no explanations, no markdown, no code blocks, no quotes.\n\n"
             f"- Output the final message 100% in ENGLISH (even if the code or variables in the diff are in Spanish).\n"
