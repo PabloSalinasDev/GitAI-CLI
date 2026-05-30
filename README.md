@@ -12,6 +12,21 @@ An offline, privacy-first CLI tool that automatically generates structured Git c
   </a>
 </p>
 
+---
+
+## Why GitAI? (Educational Purpose)
+
+Starting out in software development requires absorbing dozens of industry best practices simultaneously. Adopting the **Conventional Commits** standard right from the beginning often causes friction and leads to wasted time staring at a blank terminal screen wondering how to phrase a change.
+
+GitAI was built to act as an **invisible mentor inside your console**, specifically designed for developers looking to professionalize their daily workflow without losing focus on writing code.
+
+The benefit of implementing this CLI is twofold:
+
+* **Immediate Impact (Professionalism):** It resolves technical nomenclature in just a few seconds, ensuring a pristine, clean, and standardized Git history. This is ideal for making your portfolio stand out to recruiters reviewing your GitHub repositories.
+* **Passive Learning (Long-term):** It works through imitation and consistency. By interactively auditing how the AI categorizes your syntax changes with precise tags (`feat`, `fix`, `refactor`), a developer's brain naturally absorbs the pattern over time, learning how to structure correct commits organically.
+
+---
+
 ## Features
 
 - **100% Local Ingestion**: Uses `llama-cpp-python` to run model inference completely offline via a background HTTP server on `localhost:8089`.
