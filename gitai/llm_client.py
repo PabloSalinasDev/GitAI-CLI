@@ -59,7 +59,7 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
     if len(filtered_diff) > max_estimated:
         critical_lines = [l for l in clean_lines if l.startswith("---") or l.startswith("+++") or l.startswith("@@")]
         if critical_lines:
-            filtered_diff = "\n".join(critical_lines[:40]) + "\n... [Diff truncated structural view due to large size] ..."
+            filtered_diff = "\n".join(critical_lines[:70]) + "\n... [Diff truncated structural view due to large size] ..."
 
     # DEBUG PRINT BLOCK
     if debug:
@@ -163,13 +163,8 @@ def stop_daemon():
 def generate_commit_message(diff, initial_commit=False, lang="en"):
     """Generates the commit message by communicating via HTTP with the background daemon."""
     
-    # 1. Adaptive cleanup and pruning
+    # Adaptive cleanup and pruning
     diff = clean_git_diff(diff, max_estimated=2500, debug=True)
-    
-    # 2. Hard physical limit
-    max_diff_chars = 3000
-    if len(diff) > max_diff_chars:
-        diff = diff[:max_diff_chars] + "\n... [Diff truncated] ..."
     
     if lang == "es":
         user_instruction = "Genera un mensaje de commit corto basándote en el siguiente git diff:"
