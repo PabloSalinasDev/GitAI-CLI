@@ -294,7 +294,7 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
         if commit_message.startswith("'") and commit_message.endswith("'"):
             commit_message = commit_message[1:-1].strip()
 
-        print(f"\n⚡ Inferencia completada en {elapsed_time:.2f}s")
+        print(f"\n⚡ Inference completed on {elapsed_time:.2f}s")
 
         return commit_message
 
