@@ -280,8 +280,12 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
     }
 
     try:
+        start_time = time.perf_counter()
         response = httpx.post(f"http://localhost:{PORT}/v1/completions", json=payload, timeout=120.0)
         response.raise_for_status()
+
+        elapsed_time = time.perf_counter() - start_time
+
         commit_message = response.json()["choices"][0]["text"].strip()
 
         # Cleaning external quotes around the final message
@@ -289,6 +293,8 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
             commit_message = commit_message[1:-1].strip()
         if commit_message.startswith("'") and commit_message.endswith("'"):
             commit_message = commit_message[1:-1].strip()
+
+        print(f"\n⚡ Inferencia completada en {elapsed_time:.2f}s")
 
         return commit_message
 

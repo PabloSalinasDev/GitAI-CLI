@@ -82,7 +82,7 @@ python -m pipx ensurepath
 Then install gitai globally:
 
 ```bash
-python -m pipx install --pip-args="--prefer-binary" .\
+$env:CMAKE_ARGS="-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS"; pipx install --pip-args="--prefer-binary" .
 ```
 
 ## Setup (one time)
@@ -164,9 +164,9 @@ Commit message generation runs entirely on CPU. Generation time depends on your 
 
 | Hardware | Estimated time |
 |----------|----------------|
-| Modern desktop CPU (8+ cores) | ~5–9 seconds |
-| Laptop / older CPU | ~9–16 seconds |
-| CPU with few cores or low clock | 16+ seconds |
+| Modern desktop CPU (8+ cores) | ~5–20 seconds |
+| Laptop / older CPU | ~16–45 seconds |
+| CPU with few cores or low clock | 30+ seconds |
 
 GPU acceleration is not supported in the default installation to keep setup simple (no CUDA or ROCm required).
 
