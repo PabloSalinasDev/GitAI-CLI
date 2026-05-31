@@ -8,6 +8,8 @@ import psutil
 from gitai.config import MODEL_PATH, PORT
 
 
+_daemon_process = None
+
 try:
     _physical_cores = psutil.cpu_count(logical=False) or psutil.cpu_count() or 4
     _logical_cores  = psutil.cpu_count(logical=True) or 4
@@ -81,6 +83,7 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
 
 def start_daemon(lang="en"):
     """Starts the llama_cpp server as a silent background process using your optimized parameters."""
+    global _daemon_process
     try:
         res = httpx.get(f"http://localhost:{PORT}/v1/models")
         if res.status_code == 200:
@@ -111,7 +114,7 @@ def start_daemon(lang="en"):
     creation_flags = 0x08000000
     
     # Use close_fds=True to completely unbind file descriptors from the current terminal
-    subprocess.Popen(
+    _daemon_process=subprocess.Popen(
         cmd, 
         stdout=subprocess.DEVNULL, 
         stderr=subprocess.DEVNULL, 
@@ -150,6 +153,16 @@ def start_daemon(lang="en"):
 
 def stop_daemon():
     """Finds the background server process and terminates it to free memory."""
+    global _daemon_process
+    
+    if _daemon_process:
+        try:
+            _daemon_process.terminate()
+            _daemon_process.wait(timeout=3)
+            _daemon_process = None
+            return
+        except Exception:
+            pass
     try:
         for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
             if proc.info['cmdline'] and "llama_cpp.server" in " ".join(proc.info['cmdline']):
