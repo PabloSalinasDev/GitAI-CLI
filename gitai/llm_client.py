@@ -78,7 +78,7 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
         print(Fore.CYAN + "═"*55)
         print(f" • Raw Diff Volume:   {initial_char_count} chars")
         print(f" • Clean Data Sent:   {final_char_count} chars")
-        print(" • Efficiency Bonus:" + Fore.GREEN + f"{saved_chars} chars saved")
+        print(" • Efficiency Bonus:   " + Fore.GREEN + f"{saved_chars} chars saved")
         print(Fore.CYAN + "═"*55)
 
         global _inference_done
@@ -99,12 +99,12 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
                 filled_length = int(bar_length * percent // 100)
                 bar = Fore.YELLOW + '█' * filled_length + Style.DIM + '-' * (bar_length - filled_length)
 
-                sys.stdout.write(f'\r Crunching diff: [{bar}' + Style.RESET_ALL + Fore.YELLOW + f'] {percent:.0f}%')
+                sys.stdout.write(Fore.YELLOW + f'\r Crunching diff: [{bar}' + Style.RESET_ALL + Fore.YELLOW + f'] {percent:.0f}%')
                 sys.stdout.flush()
                 time.sleep(0.2)
 
             bar_final = '█' * bar_length
-            sys.stdout.write(f'\r Crunching diff: [{bar_final}' + Fore.GREEN + '] 100%\n\n')
+            sys.stdout.write(Fore.YELLOW + f'\r Crunching diff: [{bar_final}' + Fore.YELLOW + '] 100%\n\n')
             sys.stdout.flush()
 
         loading_thread = threading.Thread(target=progress_bar)
@@ -118,7 +118,7 @@ def start_daemon(lang="en"):
     try:
         res = httpx.get(f"http://localhost:{PORT}/v1/models")
         if res.status_code == 200:
-            print(Fore.GREEN + "GitAI server daemon is already running in the background.")
+            print(Fore.CYAN + "GitAI server daemon is already running in the background.")
             return
     except httpx.RequestError:
         pass
@@ -342,7 +342,7 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
         if commit_message.startswith("'") and commit_message.endswith("'"):
             commit_message = commit_message[1:-1].strip()
 
-        print("\n   Inference completed on" + Fore.GREEN + f"{elapsed_time:.2f}s")
+        print("\n   Inference completed on " + Fore.GREEN + f"{elapsed_time:.2f}s")
 
         return commit_message
 
