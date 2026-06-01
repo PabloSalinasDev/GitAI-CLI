@@ -44,13 +44,29 @@ The benefit of implementing this CLI is twofold:
 4. At the end of your session, run `gitai out` to stop the daemon and free RAM.
 
 ```bash
-  ┌─────────────────────────────────────────────┐
-  │  Suggested commit message:                  │
-  └─────────────────────────────────────────────┘
+Analyzing changes...
 
-  feat: implement google OAuth login flow
 
-  [c] Confirm  [e] Edit  [x] Cancel  →
+═══════════════════════════════════════════════════════
+      [GITAI OPTIMIZER] TRAFFIC ANALYSIS
+═══════════════════════════════════════════════════════
+ • Raw Diff Volume:   3400 chars
+ • Clean Data Sent:   567 chars
+ • Efficiency Bonus:   2833 chars saved
+═══════════════════════════════════════════════════════
+ Crunching diff: [██████████████████████████████] 100%
+
+
+   Inference completed on 13.76s
+┌─────────────────────────────────────────────┐
+│         Suggested commit message:           │
+└─────────────────────────────────────────────┘
+
+  docs(readme): update setup instructions
+
+  [c] Confirm  [e] Edit  [x] Cancel  → c
+
+Commit done successfully.
 ```
 
 ---
