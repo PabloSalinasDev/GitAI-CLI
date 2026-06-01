@@ -43,31 +43,13 @@ The benefit of implementing this CLI is twofold:
 3. After staging changes, run `gitai`. It feeds the diff (or initial commit context) into the model and proposes a commit message.
 4. At the end of your session, run `gitai out` to stop the daemon and free RAM.
 
-```bash
-Analyzing changes...
+---
 
+### Real-World Benchmarks & Reference Metrics
 
-═══════════════════════════════════════════════════════
-      [GITAI OPTIMIZER] TRAFFIC ANALYSIS
-═══════════════════════════════════════════════════════
- • Raw Diff Volume:   3400 chars
- • Clean Data Sent:   567 chars
- • Efficiency Bonus:   2833 chars saved
-═══════════════════════════════════════════════════════
- Crunching diff: [██████████████████████████████] 100%
+![GitAI Terminal Benchmark](assets/gitai-terminal-benchmark.png)
 
-
-   Inference completed on 13.76s
-┌─────────────────────────────────────────────┐
-│         Suggested commit message:           │
-└─────────────────────────────────────────────┘
-
-  docs(readme): update setup instructions
-
-  [c] Confirm  [e] Edit  [x] Cancel  → c
-
-Commit done successfully.
-```
+The following metrics are **estimates based on empirical testing**. Actual execution times are non-linear and may vary depending on current CPU background load...
 
 ---
 
@@ -75,6 +57,7 @@ Commit done successfully.
 
 ```
 gitai/
+├── assets/
 ├── gitai/
 │   ├── __init__.py
 │   ├── config.py        ← model path, download logic, language config
@@ -170,7 +153,7 @@ gitai out
 
 ## Requirements
 
-- Python 3.9+
+- Python 3.10+
 - Git installed
 - ~4.7 GB disk space for the model
 
@@ -209,6 +192,7 @@ Why are these times so consistent? GitAI does not just dump raw data into the LL
 | llama-cpp-python | Run the local AI model as an HTTP server |
 | httpx | Download the model and communicate with the daemon |
 | psutil | Stop the background daemon (`gitai out`) |
+| colorama | Handle cross-platform terminal text colorization and visual hierarchy |
 
 ---
 
