@@ -71,10 +71,10 @@ def run_commit(message):
         env=get_secure_env()
     )
     if result.returncode == 0:
-        print("\n✓ Commit done successfully.")
+        print("\nCommit done successfully.")
         print(result.stdout.strip())
     else:
-        print("\n✗ Commit failed.")
+        print("\nCommit failed.")
         print(result.stderr.strip())
 
 def main():
@@ -83,13 +83,13 @@ def main():
     # 1. GLOBAL SETTINGS: gitai init (Physical download only)
     if args and args[0] == "init":
         ensure_model()
-        print("✓ GitAI global setup finished. Run 'gitai start' inside your repository to start working.")
+        print("GitAI global setup finished. Run 'gitai start' inside your repository to start working.")
         return
 
     # 2. START LOGICAL DAY: gitai start (Check local language and raise the model)
     if args and args[0] == "start":
         if not model_exists():
-            print("✗ Model file not found. Run 'gitai init' first to download it.")
+            print("Model file not found. Run 'gitai init' first to download it.")
             return
         # Smart check: if the language is not set in this repo, it asks for it.
         # On subsequent executions of the command it passes by silently.
@@ -104,7 +104,7 @@ def main():
 
     # 4. DEFAULT GLOBAL FLOW: gitai (Instant Daily Use)
     if not model_exists():
-        print("✗ GitAI is not initialized. Please run: gitai init")
+        print("GitAI is not initialized. Please run: gitai init")
         return
 
     # Silently read local Git configuration without asking questions in terminal
@@ -117,7 +117,7 @@ def main():
         context = get_staged_diff()
 
     if not context:
-        print("✗ Nothing staged. Run 'git add' before using gitai.")
+        print("Nothing staged. Run 'git add' before using gitai.")
         sys.exit(0)
 
     print("Analyzing changes...\n")
