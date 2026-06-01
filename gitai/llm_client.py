@@ -6,7 +6,11 @@ import re
 import subprocess
 import psutil
 import threading
+from colorama import init, Fore, Style
+
 from gitai.config import MODEL_PATH, PORT
+
+init(autoreset=True)
 
 
 _daemon_process = None
@@ -69,13 +73,13 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
         final_char_count = len(filtered_diff)
         saved_chars = initial_char_count - final_char_count
         
-        print("\n" + "═"*55)
-        print("      [GITAI OPTIMIZER] TRAFFIC ANALYSIS")
-        print("═"*55)
+        print("\n" + Fore.CYAN + "═"*55)
+        print(Fore.CYAN + "      [GITAI OPTIMIZER] TRAFFIC ANALYSIS")
+        print(Fore.CYAN + "═"*55)
         print(f" • Raw Diff Volume:   {initial_char_count} chars")
         print(f" • Clean Data Sent:   {final_char_count} chars")
-        print(f" • Efficiency Bonus:  {saved_chars} chars saved")
-        print("═"*55)
+        print(" • Efficiency Bonus:" + Fore.GREEN + f"{saved_chars} chars saved")
+        print(Fore.CYAN + "═"*55)
 
         global _inference_done
         _inference_done = False
@@ -93,14 +97,14 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
                     percent = 95
 
                 filled_length = int(bar_length * percent // 100)
-                bar = '█' * filled_length + '-' * (bar_length - filled_length)
+                bar = Fore.YELLOW + '█' * filled_length + Style.DIM + '-' * (bar_length - filled_length)
 
-                sys.stdout.write(f'\r Crunching diff: [{bar}] {percent:.0f}%')
+                sys.stdout.write(f'\r Crunching diff: [{bar}' + Style.RESET_ALL + Fore.YELLOW + f'] {percent:.0f}%')
                 sys.stdout.flush()
                 time.sleep(0.2)
 
             bar_final = '█' * bar_length
-            sys.stdout.write(f'\r Crunching diff: [{bar_final}] 100%\n\n')
+            sys.stdout.write(f'\r Crunching diff: [{bar_final}' + Fore.GREEN + '] 100%\n\n')
             sys.stdout.flush()
 
         loading_thread = threading.Thread(target=progress_bar)
@@ -114,12 +118,12 @@ def start_daemon(lang="en"):
     try:
         res = httpx.get(f"http://localhost:{PORT}/v1/models")
         if res.status_code == 200:
-            print("GitAI server daemon is already running in the background.")
+            print(Fore.GREEN + "GitAI server daemon is already running in the background.")
             return
     except httpx.RequestError:
         pass
 
-    print(" Loading model into RAM... (Starting work session)")
+    print(Fore.CYAN + " Loading model into RAM... (Starting work session)")
     
     cmd = [
         sys.executable, "-m", "llama_cpp.server",
@@ -160,11 +164,11 @@ def start_daemon(lang="en"):
             continue
             
     if not server_ready:
-        print(" Error: Server daemon took too long to load into RAM.")
+        print(Fore.RED + " Error: Server daemon took too long to load into RAM.")
         return
 
     # The prompt is forced to load at startup (Warm-up)
-    print(" Priming prompt cache and optimizing engine layers...")
+    print(Fore.CYAN + " Priming prompt cache and optimizing engine layers...")
     try:
         # Minimum Plain Text Diff Dummy
         dummy_diff = "--- a/init.txt\n+++ b/init.txt\n@@ -0,0 +1 @@\n+init"
@@ -173,10 +177,10 @@ def start_daemon(lang="en"):
         # This will take a few seconds to load in here, absorbing all the initial wait.
         generate_commit_message(diff=dummy_diff, initial_commit=False, lang=lang)
         
-        print(" Work session initialized. GitAI is hot and ready in the background!")
+        print(Fore.GREEN + " Work session initialized. GitAI is hot and ready in the background!")
     except Exception:
         # If for some reason the warm-up fails, do not abort the server boot
-        print(" Work session initialized. GitAI is running (cache priming skipped).")
+        print(Fore.GREEN + " Work session initialized. GitAI is running (cache priming skipped).")
 
 def stop_daemon():
     """Finds the background server process and terminates it to free memory."""
@@ -194,11 +198,11 @@ def stop_daemon():
         for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
             if proc.info['cmdline'] and "llama_cpp.server" in " ".join(proc.info['cmdline']):
                 proc.terminate()
-                print("Session closed successfully. RAM cleared.")
+                print(Fore.GREEN + "Session closed successfully. RAM cleared.")
                 return
-        print("No active GitAI session was found running.")
+        print(Fore.CYAN + "No active GitAI session was found running.")
     except ImportError:
-        print("The 'psutil' library is required to terminate the session. Please install it with: pip install psutil")
+        print(Fore.CYAN + "The 'psutil' library is required to terminate the session. Please install it with: pip install psutil")
 
 def generate_commit_message(diff, initial_commit=False, lang="en"):
     """Generates the commit message by communicating via HTTP with the background daemon."""
@@ -338,14 +342,14 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
         if commit_message.startswith("'") and commit_message.endswith("'"):
             commit_message = commit_message[1:-1].strip()
 
-        print(f"\n   Inference completed on {elapsed_time:.2f}s")
+        print("\n   Inference completed on" + Fore.GREEN + f"{elapsed_time:.2f}s")
 
         return commit_message
 
     except httpx.RequestError as exc:
         # DIAGNOSIS: The actual technical error that HTTPX is experiencing is printed
-        print(f"\n [DEBUG CLIENT] Technical connection error: {exc}")
-        raise RuntimeError(" GitAI daemon is not running. Please start your session by running: gitai start") from exc
+        print(Fore.RED + f"\n [DEBUG CLIENT] Technical connection error: {exc}")
+        raise RuntimeError(Fore.RED + " GitAI daemon is not running. Please start your session by running: gitai start") from exc
     except Exception as e:
-        print(f"\n [DEBUG CLIENT] Another error: {e}")
+        print(Fore.RED + f"\n [DEBUG CLIENT] Another error: {e}")
         raise e

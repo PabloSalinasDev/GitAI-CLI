@@ -82,7 +82,7 @@ python -m pipx ensurepath
 Then install gitai globally:
 
 ```bash
-$env:CMAKE_ARGS="-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS"; pipx install --pip-args="--prefer-binary" .
+$env:CMAKE_ARGS="-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS"; pipx install --force --pip-args="--no-cache-dir --force-reinstall --no-binary :all:" .
 ```
 
 ## Setup (one time)

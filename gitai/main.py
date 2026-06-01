@@ -1,8 +1,11 @@
 import subprocess
 import sys
+from colorama import init, Fore, Style
+
 from gitai.config import model_exists, ensure_model, get_repo_language, get_secure_env
 from gitai.llm_client import start_daemon, stop_daemon, generate_commit_message
 
+init(autoreset=True)
 
 def is_initial_commit():
     result = subprocess.run(
@@ -55,8 +58,8 @@ def get_staged_diff():
         env=get_secure_env()
     )
     if result.returncode != 0:
-        print("Error: this directory is not a git repository.")
-        print("Run 'git init' first.")
+        print(Fore.RED + "Error: this directory is not a git repository.")
+        print(Fore.CYAN + "Run 'git init' first.")
         sys.exit(1)
     return result.stdout.strip()
 
@@ -71,10 +74,10 @@ def run_commit(message):
         env=get_secure_env()
     )
     if result.returncode == 0:
-        print("\nCommit done successfully.")
+        print(Fore.GREEN + "\nCommit done successfully.")
         print(result.stdout.strip())
     else:
-        print("\nCommit failed.")
+        print(Fore.RED + "\nCommit failed.")
         print(result.stderr.strip())
 
 def main():
@@ -83,13 +86,13 @@ def main():
     # 1. GLOBAL SETTINGS: gitai init (Physical download only)
     if args and args[0] == "init":
         ensure_model()
-        print("GitAI global setup finished. Run 'gitai start' inside your repository to start working.")
+        print(Fore.CYAN + "GitAI global setup finished. Run 'gitai start' inside your repository to start working.")
         return
 
     # 2. START LOGICAL DAY: gitai start (Check local language and raise the model)
     if args and args[0] == "start":
         if not model_exists():
-            print("Model file not found. Run 'gitai init' first to download it.")
+            print(Fore.CYAN + "Model file not found. Run 'gitai init' first to download it.")
             return
         # Smart check: if the language is not set in this repo, it asks for it.
         # On subsequent executions of the command it passes by silently.
@@ -104,7 +107,7 @@ def main():
 
     # 4. DEFAULT GLOBAL FLOW: gitai (Instant Daily Use)
     if not model_exists():
-        print("GitAI is not initialized. Please run: gitai init")
+        print(Fore.CYAN + "GitAI is not initialized. Please run: gitai init")
         return
 
     # Silently read local Git configuration without asking questions in terminal
@@ -117,7 +120,7 @@ def main():
         context = get_staged_diff()
 
     if not context:
-        print("Nothing staged. Run 'git add' before using gitai.")
+        print(Fore.CYAN + "Nothing staged. Run 'git add' before using gitai.")
         sys.exit(0)
 
     print("Analyzing changes...\n")
@@ -128,19 +131,19 @@ def main():
         print(f"\n{e}")
         sys.exit(1)
 
-    print("┌─────────────────────────────────────────────┐")
-    print("│         Suggested commit message:           │")
-    print("└─────────────────────────────────────────────┘")
-    print(f"\n  {message}\n")
+    print(Fore.CYAN + "┌─────────────────────────────────────────────┐")
+    print(Fore.CYAN + "│         Suggested commit message:           │")
+    print(Fore.CYAN + "└─────────────────────────────────────────────┘")
+    print(Fore.GREEN + f"\n  {message}\n")
 
     while True:
-        choice = input("  [c] Confirm  [e] Edit  [x] Cancel  → ").strip().lower()
+        choice = input(Fore.CYAN + "  [c] Confirm  [e] Edit  [x] Cancel  → ").strip().lower()
 
         if choice == "c":
             run_commit(message)
             break
         elif choice == "e":
-            edited = input("  Enter your message: ").strip()
+            edited = input(Fore.CYAN + "  Enter your message: ").strip()
             if edited:
                 run_commit(edited)
             else:
@@ -150,7 +153,7 @@ def main():
             print("  Cancelled.")
             break
         else:
-            print("  Invalid option. Use c, e or x.")
+            print(Fore.RED + "  Invalid option. Use c, e or x.")
 
 if __name__ == "__main__":
     main()

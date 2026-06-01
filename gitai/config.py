@@ -4,6 +4,9 @@ import time
 import sys
 import subprocess
 from pathlib import Path
+from colorama import init, Fore, Style
+
+init(autoreset=True)
 
 
 MODEL_DIR      = Path(os.environ.get("LOCALAPPDATA", ".")) / "gitai" / "models"
@@ -55,18 +58,18 @@ def ensure_model():
     if model_exists():
         return
 
-    print("┌─────────────────────────────────────────────┐")
-    print("│   GitAI - First run: downloading AI model   │")
-    print("│       AI Model Setup - one time only        │")
-    print("└─────────────────────────────────────────────┘\n")
+    print(Fore.CYAN + "┌─────────────────────────────────────────────┐")
+    print(Fore.CYAN + "│   GitAI - First run: downloading AI model   │")
+    print(Fore.CYAN + "│       AI Model Setup - one time only        │")
+    print(Fore.CYAN + "└─────────────────────────────────────────────┘\n")
 
     done_flag = {"done": False, "error": None}
 
     def on_progress(pct, d_gb, t_gb):
         bar_len = 30
         filled  = int(bar_len * pct)
-        bar     = "█" * filled + "░" * (bar_len - filled)
-        print(f"\r  [{bar}] {pct*100:.1f}%  {d_gb:.2f}/{t_gb:.2f} GB", end="", flush=True)
+        bar     = Fore.YELLOW + "█" * filled + Style.DIM + "░" * (bar_len - filled)
+        print(f"\r  [{bar}" + Style.RESET_ALL + Fore.YELLOW + f"] {pct*100:.1f}%  {d_gb:.2f}/{t_gb:.2f} GB", end="", flush=True)
 
     def on_done():
         done_flag["done"] = True
@@ -80,10 +83,10 @@ def ensure_model():
         time.sleep(0.5)
 
     if done_flag["error"]:
-        print(f"\n\n Error downloading model: {done_flag['error']}")
+        print(Fore.RED + f"\n\n Error downloading model: {done_flag['error']}")
         sys.exit(1)
 
-    print("\n\n Model downloaded successfully.\n")
+    print(Fore.GREEN + "\n\n Model downloaded successfully.\n")
 
 def get_repo_language(force_ask=False):
     """
@@ -104,9 +107,9 @@ def get_repo_language(force_ask=False):
         if stored_lang in ["es", "en"]:
             return stored_lang
 
-    print("\n  [gitai] Language configuration for this repository:")
+    print(Fore.CYAN + "\n  [gitai] Language configuration for this repository:")
     while True:
-        choice = input("  [s] Spanish  [e] English  → ").strip().lower()
+        choice = input(Fore.CYAN + "  [s] Spanish  [e] English  → ").strip().lower()
         if choice == "s":
             lang = "es"
             break
@@ -114,7 +117,7 @@ def get_repo_language(force_ask=False):
             lang = "en"
             break
         else:
-            print("  Invalid option. Please select 's' or 'e'.")
+            print(Fore.RED + "  Invalid option. Please select 's' or 'e'.")
 
     subprocess.run(
         ["git", "config", "gitai.lang", lang],
@@ -122,5 +125,5 @@ def get_repo_language(force_ask=False):
         check=False,
         env=get_secure_env()
     )
-    print(f" Language saved as '{lang}' in the Git configuration of this project.\n")
+    print(Fore.GREEN + f" Language saved as '{lang}' in the Git configuration of this project.\n")
     return lang
