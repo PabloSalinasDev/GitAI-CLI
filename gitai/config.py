@@ -61,6 +61,8 @@ def ensure_model():
     print(Fore.CYAN + "┌─────────────────────────────────────────────┐")
     print(Fore.CYAN + "│   GitAI - First run: downloading AI model   │")
     print(Fore.CYAN + "│       AI Model Setup - one time only        │")
+    print(Fore.CYAN + "│                                             │")
+    print(Fore.CYAN + "│ Developed by PyBloSoft © 2026 - Ver. 1.0.1  │")
     print(Fore.CYAN + "└─────────────────────────────────────────────┘\n")
 
     done_flag = {"done": False, "error": None}
