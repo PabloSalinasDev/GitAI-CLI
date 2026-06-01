@@ -3,26 +3,31 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "GitAI"
+name = "gitai-local"
 version = "1.0.0"
 description = "AI-powered conventional commit message generator running 100% locally"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
+
 dependencies = [
-    "llama-cpp-python[server]==0.3.23",
-    "httpx==0.28.1",
-    "psutil==7.2.2",
-    "colorama==0.4.6",
+    "llama-cpp-python[server]>=0.3.0",
+    "httpx>=0.27.0",
+    "psutil>=6.0.0",
+    "colorama>=0.4.6",
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: End Users/Desktop",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Version Control :: Git",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
+
+[project.urls]
+Homepage = "https://github.com/PabloSalinasDev/GitAI-CLI"
 
 [project.scripts]
 gitai = "gitai.main:main"

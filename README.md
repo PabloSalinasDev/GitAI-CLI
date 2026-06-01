@@ -3,7 +3,7 @@
 An offline, privacy-first CLI tool that automatically generates structured Git commit messages using a local LLM via `llama.cpp`. No API keys required, no data leaves your machine.
 
 <p align="center">
-  <a href="https://pypi.org/project/gitai-cli/">
+  <a href="https://pypi.org/project/gitai-local/">
     <img src="https://img.shields.io/badge/Install-PyPI-blue?style=for-the-badge&logo=pypi" alt="Install from PyPI">
   </a>
   &nbsp;&nbsp;&nbsp;&nbsp;
@@ -47,7 +47,9 @@ The benefit of implementing this CLI is twofold:
 
 ### Real-World Benchmarks & Reference Metrics
 
-![GitAI Terminal Benchmark](assets/gitai-terminal-benchmark.png)
+<p align="center">
+  <img src="https://github.com/PabloSalinasDev/GitAI-CLI/blob/main/assets/gitai-terminal-benchmark.png?raw=true" alt="GitAI en funcionamiento" width="500">
+</p>
 
 The following metrics are **estimates based on empirical testing**. Actual execution times are non-linear and may vary depending on current CPU background load...
 
