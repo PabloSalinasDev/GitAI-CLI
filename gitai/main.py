@@ -129,7 +129,7 @@ def main():
         sys.exit(1)
 
     print("┌─────────────────────────────────────────────┐")
-    print("│  Suggested commit message:                  │")
+    print("│         Suggested commit message:           │")
     print("└─────────────────────────────────────────────┘")
     print(f"\n  {message}\n")
 

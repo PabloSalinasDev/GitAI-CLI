@@ -56,8 +56,8 @@ def ensure_model():
         return
 
     print("┌─────────────────────────────────────────────┐")
-    print("│  gitai - First run: downloading AI model    │")
-    print("│  AI Model Setup - one time only             │")
+    print("│   GitAI - First run: downloading AI model   │")
+    print("│       AI Model Setup - one time only        │")
     print("└─────────────────────────────────────────────┘\n")
 
     done_flag = {"done": False, "error": None}
@@ -80,10 +80,10 @@ def ensure_model():
         time.sleep(0.5)
 
     if done_flag["error"]:
-        print(f"\n\nError downloading model: {done_flag['error']}")
+        print(f"\n\n Error downloading model: {done_flag['error']}")
         sys.exit(1)
 
-    print("\n\nModel downloaded successfully.\n")
+    print("\n\n Model downloaded successfully.\n")
 
 def get_repo_language(force_ask=False):
     """
@@ -114,7 +114,7 @@ def get_repo_language(force_ask=False):
             lang = "en"
             break
         else:
-            print("Invalid option. Please select 's' or 'e'.")
+            print("  Invalid option. Please select 's' or 'e'.")
 
     subprocess.run(
         ["git", "config", "gitai.lang", lang],
@@ -122,5 +122,5 @@ def get_repo_language(force_ask=False):
         check=False,
         env=get_secure_env()
     )
-    print(f"Language saved as '{lang}' in the Git configuration of this project.\n")
+    print(f" Language saved as '{lang}' in the Git configuration of this project.\n")
     return lang

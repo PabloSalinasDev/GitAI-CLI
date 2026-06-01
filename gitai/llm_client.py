@@ -70,7 +70,7 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
         saved_chars = initial_char_count - final_char_count
         
         print("\n" + "═"*55)
-        print("[GITAI OPTIMIZER] TRAFFIC ANALYSIS")
+        print("      [GITAI OPTIMIZER] TRAFFIC ANALYSIS")
         print("═"*55)
         print(f" • Raw Diff Volume:   {initial_char_count} chars")
         print(f" • Clean Data Sent:   {final_char_count} chars")
@@ -119,7 +119,7 @@ def start_daemon(lang="en"):
     except httpx.RequestError:
         pass
 
-    print("Loading model into RAM... (Starting work session)")
+    print(" Loading model into RAM... (Starting work session)")
     
     cmd = [
         sys.executable, "-m", "llama_cpp.server",
@@ -160,11 +160,11 @@ def start_daemon(lang="en"):
             continue
             
     if not server_ready:
-        print("Error: Server daemon took too long to load into RAM.")
+        print(" Error: Server daemon took too long to load into RAM.")
         return
 
     # The prompt is forced to load at startup (Warm-up)
-    print("Priming prompt cache and optimizing engine layers...")
+    print(" Priming prompt cache and optimizing engine layers...")
     try:
         # Minimum Plain Text Diff Dummy
         dummy_diff = "--- a/init.txt\n+++ b/init.txt\n@@ -0,0 +1 @@\n+init"
@@ -173,10 +173,10 @@ def start_daemon(lang="en"):
         # This will take a few seconds to load in here, absorbing all the initial wait.
         generate_commit_message(diff=dummy_diff, initial_commit=False, lang=lang)
         
-        print("Work session initialized. GitAI is hot and ready in the background!")
+        print(" Work session initialized. GitAI is hot and ready in the background!")
     except Exception:
         # If for some reason the warm-up fails, do not abort the server boot
-        print("Work session initialized. GitAI is running (cache priming skipped).")
+        print(" Work session initialized. GitAI is running (cache priming skipped).")
 
 def stop_daemon():
     """Finds the background server process and terminates it to free memory."""
@@ -338,14 +338,14 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
         if commit_message.startswith("'") and commit_message.endswith("'"):
             commit_message = commit_message[1:-1].strip()
 
-        print(f"\nInference completed on {elapsed_time:.2f}s")
+        print(f"\n   Inference completed on {elapsed_time:.2f}s")
 
         return commit_message
 
     except httpx.RequestError as exc:
         # DIAGNOSIS: The actual technical error that HTTPX is experiencing is printed
-        print(f"\n[DEBUG CLIENT] Technical connection error: {exc}")
-        raise RuntimeError("GitAI daemon is not running. Please start your session by running: gitai start") from exc
+        print(f"\n [DEBUG CLIENT] Technical connection error: {exc}")
+        raise RuntimeError(" GitAI daemon is not running. Please start your session by running: gitai start") from exc
     except Exception as e:
-        print(f"\n[DEBUG CLIENT] Another error: {e}")
+        print(f"\n [DEBUG CLIENT] Another error: {e}")
         raise e
