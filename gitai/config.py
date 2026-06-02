@@ -111,7 +111,7 @@ def get_repo_language(force_ask=False):
 
     print(Fore.CYAN + "\n  [gitai] Language configuration for this repository:")
     while True:
-        choice = input(Fore.CYAN + "  [s] Spanish  [e] English  → ").strip().lower()
+        choice = input(Fore.CYAN + "   [s] Spanish  [e] English  → ").strip().lower()
         if choice == "s":
             lang = "es"
             break

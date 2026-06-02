@@ -73,42 +73,47 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
         final_char_count = len(filtered_diff)
         saved_chars = initial_char_count - final_char_count
         
-        print("\n" + Fore.CYAN + "═"*55)
-        print(Fore.CYAN + "      [GITAI OPTIMIZER] TRAFFIC ANALYSIS")
-        print(Fore.CYAN + "═"*55)
-        print(f" • Raw Diff Volume:   {initial_char_count} chars")
-        print(f" • Clean Data Sent:   {final_char_count} chars")
-        print(" • Efficiency Bonus:   " + Fore.GREEN + f"{saved_chars} chars saved")
-        print(Fore.CYAN + "═"*55)
+        if final_char_count <= 49:
+            pass
+        else:
+            print(Fore.CYAN + "═"*55)
+            print(Fore.CYAN + "      [GITAI OPTIMIZER] TRAFFIC ANALYSIS")
+            print(Fore.CYAN + "═"*55)
+            print(f" • Raw Diff Volume:   {initial_char_count} chars")
+            print(f" • Clean Data Sent:   {final_char_count} chars")
+            print(" • Efficiency Bonus:   " + Fore.GREEN + f"{saved_chars} chars saved")
+            print(Fore.CYAN + "═"*55, "\n")
 
+    global _inference_done
+    _inference_done = False
+
+    def progress_bar():
         global _inference_done
-        _inference_done = False
+        
+        bar_length = 30
+        total_steps = 350
 
-        def progress_bar():
-            bar_length = 30
-            total_steps = 350
+        for step in range(total_steps + 1):
+            if _inference_done:
+                break
 
-            for step in range(total_steps + 1):
-                if _inference_done:
-                    break
+            percent = (step / total_steps) * 100
+            if percent > 95: 
+                percent = 95
 
-                percent = (step / total_steps) * 100
-                if percent > 95: 
-                    percent = 95
+            filled_length = int(bar_length * percent // 100)
+            bar = Fore.YELLOW + '█' * filled_length + Style.DIM + '-' * (bar_length - filled_length)
 
-                filled_length = int(bar_length * percent // 100)
-                bar = Fore.YELLOW + '█' * filled_length + Style.DIM + '-' * (bar_length - filled_length)
-
-                sys.stdout.write(Fore.YELLOW + f'\r Crunching diff: [{bar}' + Style.RESET_ALL + Fore.YELLOW + f'] {percent:.0f}%')
-                sys.stdout.flush()
-                time.sleep(0.2)
-
-            bar_final = '█' * bar_length
-            sys.stdout.write(Fore.YELLOW + f'\r Crunching diff: [{bar_final}' + Fore.YELLOW + '] 100%\n\n')
+            sys.stdout.write(Fore.YELLOW + f'\r Crunching diff: [{bar}' + Style.RESET_ALL + Fore.YELLOW + f'] {percent:.0f}%')
             sys.stdout.flush()
+            time.sleep(0.2)
 
-        loading_thread = threading.Thread(target=progress_bar)
-        loading_thread.start()
+        bar_final = '█' * bar_length
+        sys.stdout.write(Fore.YELLOW + f'\r Crunching diff: [{bar_final}' + Fore.YELLOW + '] 100%\n\n')
+        sys.stdout.flush()
+
+    loading_thread = threading.Thread(target=progress_bar)
+    loading_thread.start()
 
     return filtered_diff
 
@@ -118,7 +123,7 @@ def start_daemon(lang="en"):
     try:
         res = httpx.get(f"http://localhost:{PORT}/v1/models")
         if res.status_code == 200:
-            print(Fore.CYAN + "GitAI server daemon is already running in the background.")
+            print(Fore.CYAN + " GitAI server daemon is already running in the background.")
             return
     except httpx.RequestError:
         pass
@@ -168,7 +173,7 @@ def start_daemon(lang="en"):
         return
 
     # The prompt is forced to load at startup (Warm-up)
-    print(Fore.CYAN + " Priming prompt cache and optimizing engine layers...")
+    print(Fore.CYAN + " Priming prompt cache and optimizing engine layers...\n")
     try:
         # Minimum Plain Text Diff Dummy
         dummy_diff = "--- a/init.txt\n+++ b/init.txt\n@@ -0,0 +1 @@\n+init"
@@ -198,11 +203,11 @@ def stop_daemon():
         for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
             if proc.info['cmdline'] and "llama_cpp.server" in " ".join(proc.info['cmdline']):
                 proc.terminate()
-                print(Fore.GREEN + "Session closed successfully. RAM cleared.")
+                print(Fore.GREEN + " Session closed successfully. RAM cleared.")
                 return
-        print(Fore.CYAN + "No active GitAI session was found running.")
+        print(Fore.CYAN + " No active GitAI session was found running.")
     except ImportError:
-        print(Fore.CYAN + "The 'psutil' library is required to terminate the session. Please install it with: pip install psutil")
+        print(Fore.CYAN + " The 'psutil' library is required to terminate the session. Please install it with: pip install psutil")
 
 def generate_commit_message(diff, initial_commit=False, lang="en"):
     """Generates the commit message by communicating via HTTP with the background daemon."""
@@ -342,7 +347,7 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
         if commit_message.startswith("'") and commit_message.endswith("'"):
             commit_message = commit_message[1:-1].strip()
 
-        print("\n   Inference completed on " + Fore.GREEN + f"{elapsed_time:.2f}s")
+        print("           Inference completed on " + Fore.GREEN + f"{elapsed_time:.2f}s")
 
         return commit_message
 
