@@ -1,4 +1,4 @@
-# GitAI
+# GitAI-CLI
 
 An offline, privacy-first CLI tool that automatically generates structured Git commit messages using a local LLM via `llama.cpp`. No API keys required, no data leaves your machine.
 
@@ -58,7 +58,7 @@ The following metrics are **estimates based on empirical testing**. Actual execu
 ## Project structure
 
 ```
-gitai/
+GitAI-CLI/
 ├── assets/
 ├── gitai/
 │   ├── __init__.py
