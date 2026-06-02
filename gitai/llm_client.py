@@ -77,11 +77,11 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
             pass
         else:
             print(Fore.CYAN + "═"*55)
-            print(Fore.CYAN + "      [GITAI OPTIMIZER] TRAFFIC ANALYSIS")
+            print(Fore.CYAN + "         [GITAI OPTIMIZER] TRAFFIC ANALYSIS")
             print(Fore.CYAN + "═"*55)
             print(f" • Raw Diff Volume:   {initial_char_count} chars")
             print(f" • Clean Data Sent:   {final_char_count} chars")
-            print(" • Efficiency Bonus:   " + Fore.GREEN + f"{saved_chars} chars saved")
+            print(" • Efficiency Bonus:  " + Fore.GREEN + f"{saved_chars} chars saved")
             print(Fore.CYAN + "═"*55, "\n")
 
     global _inference_done
@@ -347,7 +347,7 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
         if commit_message.startswith("'") and commit_message.endswith("'"):
             commit_message = commit_message[1:-1].strip()
 
-        print("           Inference completed on " + Fore.GREEN + f"{elapsed_time:.2f}s")
+        print("        Inference completed on " + Fore.GREEN + f"{elapsed_time:.2f}s")
 
         return commit_message
 
