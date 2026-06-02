@@ -71,7 +71,7 @@ def ensure_model():
         bar_len = 30
         filled  = int(bar_len * pct)
         bar     = Fore.YELLOW + "█" * filled + Style.DIM + "░" * (bar_len - filled)
-        print(Fore.YELLOW + f"\r  [{bar}" + Style.RESET_ALL + Fore.YELLOW + f"] {pct*100:.1f}%  {d_gb:.2f}/{t_gb:.2f} GB", end="", flush=True)
+        print(Fore.YELLOW + f"\r[{bar}" + Style.RESET_ALL + Fore.YELLOW + f"] {pct*100:.1f}%  {d_gb:.2f}/{t_gb:.2f} GB", end="", flush=True)
 
     def on_done():
         done_flag["done"] = True

@@ -102,7 +102,7 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
                 percent = 95
 
             filled_length = int(bar_length * percent // 100)
-            bar = Fore.YELLOW + '█' * filled_length + Style.DIM + '-' * (bar_length - filled_length)
+            bar = Fore.YELLOW + '█' * filled_length + Style.DIM + '░' * (bar_length - filled_length)
 
             sys.stdout.write(Fore.YELLOW + f'\r Crunching diff: [{bar}' + Style.RESET_ALL + Fore.YELLOW + f'] {percent:.0f}%')
             sys.stdout.flush()
