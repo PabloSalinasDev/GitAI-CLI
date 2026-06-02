@@ -134,26 +134,26 @@ def main():
     print(Fore.CYAN + "┌─────────────────────────────────────────────┐")
     print(Fore.CYAN + "│         Suggested commit message:           │")
     print(Fore.CYAN + "└─────────────────────────────────────────────┘")
-    print(Fore.GREEN + f"\n  {message}\n")
+    print(Fore.GREEN + f"\n {message}\n")
 
     while True:
-        choice = input(Fore.CYAN + "  [c] Confirm  [e] Edit  [x] Cancel  → ").strip().lower()
+        choice = input(Fore.CYAN + " [c] Confirm  [e] Edit  [x] Cancel  → ").strip().lower()
 
         if choice == "c":
             run_commit(message)
             break
         elif choice == "e":
-            edited = input(Fore.CYAN + "  Enter your message: ").strip()
+            edited = input(Fore.CYAN + " Enter your message: ").strip()
             if edited:
                 run_commit(edited)
             else:
-                print("  Empty message. Cancelled.")
+                print(" Empty message. Cancelled.")
             break
         elif choice == "x":
-            print("  Cancelled.")
+            print(" Cancelled.")
             break
         else:
-            print(Fore.RED + "  Invalid option. Use c, e or x.")
+            print(Fore.RED + " Invalid option. Use c, e or x.")
 
 if __name__ == "__main__":
     main()
