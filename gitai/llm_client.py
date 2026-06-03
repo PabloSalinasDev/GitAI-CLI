@@ -69,6 +69,9 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
         if critical_lines:
             filtered_diff = "\n".join(critical_lines[:70]) + "\n... [Diff truncated structural view due to large size] ..."
 
+    if not filtered_diff.strip():
+        return "", None
+
     if debug:
         final_char_count = len(filtered_diff)
         saved_chars = initial_char_count - final_char_count
@@ -230,6 +233,15 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
 
     # Adaptive cleanup and pruning
     diff, loading_thread = clean_git_diff(diff, max_estimated=2500, debug=True)
+
+    if not diff:
+        if lang == "es":
+            print(Fore.CYAN + "\n [INFO] Los cambios detectados corresponden a archivos ignorados (imágenes o multimedia).")
+            print(Fore.YELLOW + " No hay líneas de código ejecutables para analizar. Escribe tu commit manualmente.\n")
+        else:
+            print(Fore.CYAN + "\n [INFO] All changes correspond to ignored assets (images or media files).")
+            print(Fore.YELLOW + " No executable code lines left to analyze. Please write your commit manually.\n")
+        return None
     
     if lang == "es":
         user_instruction = "Genera un mensaje de commit corto basándote en el siguiente git diff:"
