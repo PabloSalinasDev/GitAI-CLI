@@ -73,7 +73,7 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
         final_char_count = len(filtered_diff)
         saved_chars = initial_char_count - final_char_count
         
-        if final_char_count <= 49:
+        if final_char_count <= 50:
             pass
         else:
             print(Fore.CYAN + "═"*55)
@@ -176,7 +176,7 @@ def start_daemon(lang="en"):
     print(Fore.CYAN + " Priming prompt cache and optimizing engine layers...\n")
     try:
         # Minimum Plain Text Diff Dummy
-        dummy_diff = "--- a/init.txt\n+++ b/init.txt\n@@ -0,0 +1 @@\n+init"
+        dummy_diff = "@@ -0,0 @@"
         
         # The original function is executed in the background. 
         # This will take a few seconds to load in here, absorbing all the initial wait.
@@ -212,6 +212,13 @@ def stop_daemon():
 def generate_commit_message(diff, initial_commit=False, lang="en"):
     """Generates the commit message by communicating via HTTP with the background daemon."""
     
+    try:
+        httpx.get(f"http://localhost:{PORT}/v1/models", timeout=0.5)
+    except (httpx.RequestError, httpx.ConnectError):
+        print(Fore.RED + "\n [ERROR] GitAI daemon is not running.")
+        print(Fore.YELLOW + " Please start your session by running: " + Fore.GREEN + "gitai start\n")
+        return None
+
     # Adaptive cleanup and pruning
     diff = clean_git_diff(diff, max_estimated=2500, debug=True)
     
