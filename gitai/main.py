@@ -82,20 +82,20 @@ def run_commit(message):
 
 def print_help():
     """Imprime el manual de usuario integrado directamente en la terminal con accesos web."""
-    print(Fore.CYAN + "═"*65)
-    print(Fore.CYAN + "    GitAI CLI - Offline Privacy-First Commit Generator (v1.0.4)")
-    print(Fore.CYAN + "═"*65)
-    print("\nUsage:")
+    print(Fore.CYAN + "═"*74)
+    print(Fore.CYAN + "        GitAI CLI - Offline Privacy-First Commit Generator (v1.1.0)")
+    print(Fore.CYAN + "═"*74)
+    print("Usage:")
     print(f"  gitai         {Style.DIM}Analyze staged changes and generate a conventional commit.{Style.RESET_ALL}")
     print(f"  gitai init    {Style.DIM}Download and configure the local LLM engine weights.{Style.RESET_ALL}")
     print(f"  gitai start   {Style.DIM}Launch the background daemon and prime the prompt cache.{Style.RESET_ALL}")
     print(f"  gitai out     {Style.DIM}Stop the background daemon session and free system RAM.{Style.RESET_ALL}")
     print(f"  gitai help    {Style.DIM}Show this user manual screen.{Style.RESET_ALL}")
-    print(Fore.CYAN + "─"*65)
+    print(Fore.CYAN + "─"*74)
     print("Links & Support:")
     print(f"  • Documentation:  {Fore.BLUE}https://github.com/PabloSalinasDev/GitAI-CLI#readme{Style.RESET_ALL}")
     print(f"  • Report an Issue: {Fore.BLUE}https://github.com/PabloSalinasDev/GitAI-CLI/issues{Style.RESET_ALL}")
-    print(Fore.CYAN + "═"*65 + "\n")
+    print(Fore.CYAN + "═"*74 + "\n")
 
 def main():
     args = sys.argv[1:]
