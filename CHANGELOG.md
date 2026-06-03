@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fixed an asynchronous race condition in `llm_client.py` where the prompt would collide with the progress bar completion string, causing a stray character artifact on initial runs.
+- Fixed a critical edge case in `llm_client.py` where updating only ignored binary assets (like images or media files) resulted in an empty text payload, causing the local LLM to hallucinate unrelated technical commit messages.
 
 ---
 
