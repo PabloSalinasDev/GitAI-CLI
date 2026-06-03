@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integrated direct interactive hyperlinks to the official GitHub documentation and issue tracker within the help console footprint.
 - Added a robust command-line validation filter to block invalid positional arguments and guide users toward the help menu.
 
+### Fixed
+- Fixed an asynchronous race condition in `llm_client.py` where the prompt would collide with the progress bar completion string, causing a stray character artifact on initial runs.
+
 ---
 
 ## [1.0.4] - 2026-06-03
