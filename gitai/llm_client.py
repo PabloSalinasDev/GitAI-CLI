@@ -94,29 +94,37 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
         bar_length = 30
         total_steps = 350
 
-        for step in range(total_steps + 1):
-            if _inference_done:
-                break
-
-            percent = (step / total_steps) * 100
-            if percent > 95: 
-                percent = 95
-
-            filled_length = int(bar_length * percent // 100)
-            bar = Fore.YELLOW + '█' * filled_length + Style.DIM + '░' * (bar_length - filled_length)
-
-            sys.stdout.write(Fore.YELLOW + f'\r Crunching diff: [{bar}' + Style.RESET_ALL + Fore.YELLOW + f'] {percent:.0f}%')
-            sys.stdout.flush()
-            time.sleep(0.2)
-
-        bar_final = '█' * bar_length
-        sys.stdout.write(Fore.YELLOW + f'\r Crunching diff: [{bar_final}' + Fore.YELLOW + '] 100%\n\n')
+        sys.stdout.write("\033[?25l")
         sys.stdout.flush()
+
+        try:
+            for step in range(total_steps + 1):
+                if _inference_done:
+                    break
+
+                percent = (step / total_steps) * 100
+                if percent > 95: 
+                    percent = 95
+
+                filled_length = int(bar_length * percent // 100)
+                bar = Fore.YELLOW + '█' * filled_length + Style.DIM + '░' * (bar_length - filled_length)
+
+                sys.stdout.write(Fore.YELLOW + f'\r Crunching diff: [{bar}' + Style.RESET_ALL + Fore.YELLOW + f'] {percent:.0f}%')
+                sys.stdout.flush()
+                time.sleep(0.2)
+
+            bar_final = '█' * bar_length
+            sys.stdout.write(Fore.YELLOW + f'\r Crunching diff: [{bar_final}' + Fore.YELLOW + '] 100%\n\n')
+            sys.stdout.flush()
+            
+        finally:
+            sys.stdout.write("\033[?25h")
+            sys.stdout.flush()
 
     loading_thread = threading.Thread(target=progress_bar)
     loading_thread.start()
 
-    return filtered_diff
+    return filtered_diff, loading_thread
 
 def start_daemon(lang="en"):
     """Starts the llama_cpp server as a silent background process using your optimized parameters."""
@@ -221,7 +229,7 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
         return None
 
     # Adaptive cleanup and pruning
-    diff = clean_git_diff(diff, max_estimated=2500, debug=True)
+    diff, loading_thread = clean_git_diff(diff, max_estimated=2500, debug=True)
     
     if lang == "es":
         user_instruction = "Genera un mensaje de commit corto basándote en el siguiente git diff:"
@@ -344,6 +352,9 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
         global _inference_done
         _inference_done = True
         time.sleep(0.25)
+
+        if loading_thread and loading_thread.is_alive():
+            loading_thread.join()
 
         elapsed_time = time.perf_counter() - start_time
 
