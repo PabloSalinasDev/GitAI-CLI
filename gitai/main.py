@@ -123,13 +123,14 @@ def main():
         print(Fore.CYAN + " Nothing staged. Run 'git add' before using gitai.")
         sys.exit(0)
 
-    print(" Analyzing changes...\n")
-    
     try:
         message = generate_commit_message(context, initial_commit=initial, lang=lang)
     except Exception as e:
         print(f"\n{e}")
         sys.exit(1)
+
+    if message is None:
+        sys.exit(0)
 
     print(Fore.CYAN + "┌─────────────────────────────────────────────┐")
     print(Fore.CYAN + "│         Suggested commit message:           │")

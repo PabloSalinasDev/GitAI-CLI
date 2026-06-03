@@ -76,6 +76,7 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
         if final_char_count <= 50:
             pass
         else:
+            print(" Analyzing changes...\n")
             print(Fore.CYAN + "═"*55)
             print(Fore.CYAN + "         [GITAI OPTIMIZER] TRAFFIC ANALYSIS")
             print(Fore.CYAN + "═"*55)
