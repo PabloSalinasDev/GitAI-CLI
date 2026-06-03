@@ -43,6 +43,18 @@ The benefit of implementing this CLI is twofold:
 3. After staging changes, run `gitai`. It feeds the diff (or initial commit context) into the model and proposes a commit message.
 4. At the end of your session, run `gitai out` to stop the daemon and free RAM.
 
+### 📖 Interactive Help & Documentation Access
+
+GitAI CLI features a native, robust command-line validation and help module. If you ever need a quick reminder of the available architecture commands, explicit routing links, or want to report a technical issue, you can invoke the user manual directly from your shell.
+
+Run any of the following equivalent commands:
+```bash
+gitai help
+# or using standard POSIX flags
+gitai -h
+gitai --help
+```
+
 ---
 
 ### Real-World Benchmarks & Reference Metrics
