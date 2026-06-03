@@ -1,6 +1,6 @@
 import subprocess
 import sys
-from colorama import init, Fore
+from colorama import init, Fore, Style
 
 from gitai.config import model_exists, ensure_model, get_repo_language, get_secure_env
 from gitai.llm_client import start_daemon, stop_daemon, generate_commit_message
@@ -80,6 +80,23 @@ def run_commit(message):
         print(Fore.RED + "\n Commit failed.")
         print(result.stderr.strip())
 
+def print_help():
+    """Imprime el manual de usuario integrado directamente en la terminal con accesos web."""
+    print(Fore.CYAN + "═"*65)
+    print(Fore.CYAN + "    GitAI CLI - Offline Privacy-First Commit Generator (v1.0.4)")
+    print(Fore.CYAN + "═"*65)
+    print("\nUsage:")
+    print(f"  gitai         {Style.DIM}Analyze staged changes and generate a conventional commit.{Style.RESET_ALL}")
+    print(f"  gitai init    {Style.DIM}Download and configure the local LLM engine weights.{Style.RESET_ALL}")
+    print(f"  gitai start   {Style.DIM}Launch the background daemon and prime the prompt cache.{Style.RESET_ALL}")
+    print(f"  gitai out     {Style.DIM}Stop the background daemon session and free system RAM.{Style.RESET_ALL}")
+    print(f"  gitai help    {Style.DIM}Show this user manual screen.{Style.RESET_ALL}")
+    print(Fore.CYAN + "─"*65)
+    print("Links & Support:")
+    print(f"  • Documentation:  {Fore.BLUE}https://github.com/PabloSalinasDev/GitAI-CLI#readme{Style.RESET_ALL}")
+    print(f"  • Report an Issue: {Fore.BLUE}https://github.com/PabloSalinasDev/GitAI-CLI/issues{Style.RESET_ALL}")
+    print(Fore.CYAN + "═"*65 + "\n")
+
 def main():
     args = sys.argv[1:]
     
@@ -109,6 +126,15 @@ def main():
     if not model_exists():
         print(Fore.CYAN + " GitAI is not initialized. Please run: gitai init")
         return
+
+    if args and args[0] in ["help", "-h", "--help"]:
+        print_help()
+        return
+
+    if args:
+        print(Fore.RED + f" Error: Unknown command '{args[0]}'.")
+        print(Fore.CYAN + " Run 'gitai help' to see the list of available commands.\n")
+        sys.exit(1)
 
     # Silently read local Git configuration without asking questions in terminal
     lang = get_repo_language(force_ask=False)
