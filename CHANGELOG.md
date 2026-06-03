@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.3] - 2026-06-03
+## [1.0.3] - 2026-06-02
 
 ### Changed
 - Refactored the core background daemon warm-up routine by reducing the processing overhead of the initial mock payload.
@@ -45,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.2] - 2026-06-03
+## [1.0.2] - 2026-06-01
 
 ### Added
 - Added custom branding footer print (`Developed by PyBloSoft © 2026 - Ver. 1.0.2`) upon successful completion of the global system installation command (`gitai init`).
@@ -55,7 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.1] - 2026-06-03
+## [1.0.1] - 2026-06-01
 
 ### Changed
 - Updated documentation across package distribution modules to explicitly define installation procedures via `pipx` for isolated global execution environments.
@@ -66,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.0] - 2026-06-03
+## [1.0.0] - 2026-05-29
 
 ### Added
 - Initial official release of GitAI CLI.
