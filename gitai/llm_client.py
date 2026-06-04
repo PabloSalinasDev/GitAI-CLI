@@ -136,11 +136,8 @@ def start_daemon(lang="en"):
     try:
         res = httpx.get(f"http://localhost:{PORT}/v1/models", timeout=2.0)
         if res.status_code == 200:
-            if lang == "es":
-                print(Fore.CYAN + " El servidor para GitAI ya está corriendo en segundo plano.")
-            else:
-                print(Fore.CYAN + " GitAI server daemon is already running in the background.")
-            return
+            print(Fore.CYAN + " GitAI server daemon is already running in the background.")
+
     except httpx.RequestError:
         pass
 
@@ -189,10 +186,7 @@ def start_daemon(lang="en"):
 
         sys.stdout.write("\033[?25h")
         sys.stdout.flush()
-        if lang == "es":
-            print(Fore.YELLOW + "\n [INFO] Arranque cancelado por el usuario. Proceso terminado y RAM liberada.")
-        else:
-            print(Fore.YELLOW + "\n [INFO] Startup cancelled by user. Process terminated and RAM cleared.")
+        print(Fore.YELLOW + "\n [INFO] Startup cancelled by user. Process terminated and RAM cleared.")
         sys.exit(0)
 
     if not server_ready:
@@ -204,11 +198,8 @@ def start_daemon(lang="en"):
         dummy_diff = "@@ -0,0 @@"
 
         generate_commit_message(diff=dummy_diff, initial_commit=False, lang=lang, warmup=True)
-        
-        if lang == "es":
-            print(Fore.GREEN + " ¡Sesión de trabajo inicializada! GitAI está listo para operar.")
-        else:
-            print(Fore.GREEN + " Work session initialized. GitAI is hot and ready in the background!")
+
+        print(Fore.GREEN + " Work session initialized. GitAI is hot and ready in the background!")
 
     except KeyboardInterrupt:
 
@@ -221,19 +212,11 @@ def start_daemon(lang="en"):
 
         sys.stdout.write("\033[?25h")
         sys.stdout.flush()
-
-        if lang == "es":
-            print(Fore.YELLOW + "\n [INFO] Operación abortada bruscamente durante la optimización. Servidor purgado de la RAM.")
-        else:
-            print(Fore.YELLOW + "\n [INFO] Operation hard-aborted during optimization. Server purged from RAM.")
-
+        print(Fore.YELLOW + "\n [INFO] Operation hard-aborted during optimization. Server purged from RAM.")
         os._exit(1)
 
     except Exception:
-        if lang == "es":
-            print(Fore.GREEN + " Sesión inicializada. GitAI está corriendo (optimización omitida).")
-        else:
-            print(Fore.GREEN + " Work session initialized. GitAI is running (cache priming skipped).")
+        print(Fore.GREEN + " Work session initialized. GitAI is running (cache priming skipped).")
 
 def stop_daemon():
     """Finds the background server process and terminates it to free memory."""
@@ -271,12 +254,8 @@ def generate_commit_message(diff, initial_commit=False, lang="en", warmup=False)
     diff, loading_thread = clean_git_diff(diff, max_estimated=2500, debug=True)
 
     if not diff:
-        if lang == "es":
-            print(Fore.CYAN + "\n [INFO] Los cambios detectados corresponden a archivos ignorados (imágenes o multimedia).")
-            print(Fore.YELLOW + " No hay líneas de código ejecutables para analizar. Escribe tu commit manualmente.\n")
-        else:
-            print(Fore.CYAN + "\n [INFO] All changes correspond to ignored assets (images or media files).")
-            print(Fore.YELLOW + " No executable code lines left to analyze. Please write your commit manually.\n")
+        print(Fore.CYAN + "\n [INFO] All changes correspond to ignored assets (images or media files).")
+        print(Fore.YELLOW + " No executable code lines left to analyze. Please write your commit manually.\n")
         return None
     
     if lang == "es":
@@ -423,16 +402,12 @@ def generate_commit_message(diff, initial_commit=False, lang="en", warmup=False)
         # Force the secondary thread to terminate immediately so that it does not step on the screen
         if loading_thread and loading_thread.is_alive():
             loading_thread.join()
-        
+
         # Make sure to revive the cursor in case it was hidden in the bar
         sys.stdout.write("\033[?25h")
         sys.stdout.flush()
-        
-        if lang == "es":
-            print(Fore.YELLOW + " [INFO] Generación de mensaje cancelada por el usuario. Exiting.")
-        else:
-            print(Fore.YELLOW + " [INFO] Generation cancelled by user. Exiting.")
-            
+        print(Fore.YELLOW + " [INFO] Generation cancelled by user. Exiting.")
+
         if warmup:
             raise KeyboardInterrupt
         else:
