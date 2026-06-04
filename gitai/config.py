@@ -1,6 +1,4 @@
 import os
-import threading
-import time
 import sys
 import subprocess
 from pathlib import Path
@@ -24,76 +22,104 @@ def get_secure_env():
 def model_exists():
     return MODEL_PATH.exists() and MODEL_PATH.stat().st_size > 100_000_000
 
-def download_model(on_progress, on_done, on_error):
-    import httpx
-    def run():
-        try:
-            MODEL_DIR.mkdir(parents=True, exist_ok=True)
-            tmp_path = MODEL_PATH.with_suffix(".tmp")
-
-            with httpx.stream("GET", MODEL_URL, follow_redirects=True, timeout=None) as r:
-                r.raise_for_status()
-                total      = int(r.headers.get("content-length", 0))
-                downloaded = 0
-
-                with open(tmp_path, "wb") as f:
-                    for chunk in r.iter_bytes(chunk_size=1024 * 256):
-                        f.write(chunk)
-                        downloaded += len(chunk)
-                        if total:
-                            pct  = downloaded / total
-                            d_gb = downloaded / 1_073_741_824
-                            t_gb = total      / 1_073_741_824
-                            on_progress(pct, d_gb, t_gb)
-
-            tmp_path.rename(MODEL_PATH)
-            on_done()
-
-        except Exception as e:
-            on_error(str(e))
-
-    threading.Thread(target=run, daemon=True).start()
-
 def ensure_model():
+    """Ensures the model is downloaded synchronously, hiding the cursor and cleaning up on Ctrl+C."""
     if model_exists():
         return
 
+    import httpx
+
     print(Fore.CYAN + "┌─────────────────────────────────────────────┐")
     print(Fore.CYAN + "│   GitAI - First run: downloading AI model   │")
-    print(Fore.CYAN + "│       AI Model Setup - one time only        │")
+    print(Fore.CYAN + "│      AI Model Setup - one time only         │")
     print(Fore.CYAN + "│                                             │")
-    print(Fore.CYAN + "│ Developed by PyBloSoft © 2026 - Ver. 1.0.2  │")
+    print(Fore.CYAN + "│ Developed by PyBloSoft © 2026 - Ver. 1.1.0  │")
     print(Fore.CYAN + "└─────────────────────────────────────────────┘\n")
 
-    done_flag = {"done": False, "error": None}
+    MODEL_DIR.mkdir(parents=True, exist_ok=True)
+    tmp_path = MODEL_PATH.with_suffix(".tmp")
 
-    def on_progress(pct, d_gb, t_gb):
+    if tmp_path.exists():
+        try:
+            os.remove(tmp_path)
+        except Exception:
+            pass
+
+    sys.stdout.write("\033[?25l")
+    sys.stdout.flush()
+
+    def print_progress(pct, d_gb, t_gb):
         bar_len = 30
         filled  = int(bar_len * pct)
         bar     = Fore.YELLOW + "█" * filled + Style.DIM + "░" * (bar_len - filled)
         print(Fore.YELLOW + f"\r[{bar}" + Style.RESET_ALL + Fore.YELLOW + f"] {pct*100:.1f}%  {d_gb:.2f}/{t_gb:.2f} GB", end="", flush=True)
 
-    def on_done():
-        done_flag["done"] = True
+    f = None
+    try:
+        with open(tmp_path, "wb") as f:
+            with httpx.stream("GET", MODEL_URL, follow_redirects=True, timeout=None) as r:
+                r.raise_for_status()
+                total      = int(r.headers.get("content-length", 0))
+                downloaded = 0
 
-    def on_error(e):
-        done_flag["error"] = e
+                for chunk in r.iter_bytes(chunk_size=1024 * 256):
+                    f.write(chunk)
+                    downloaded += len(chunk)
+                    if total:
+                        pct  = downloaded / total
+                        d_gb = downloaded / 1_073_741_824
+                        t_gb = total      / 1_073_741_824
+                        print_progress(pct, d_gb, t_gb)
 
-    download_model(on_progress, on_done, on_error)
+        sys.stdout.write("\033[?25h")
+        sys.stdout.flush()
+        
+        tmp_path.rename(MODEL_PATH)
+        print(Fore.GREEN + "\n\n Model downloaded successfully.\n")
 
-    while not done_flag["done"] and not done_flag["error"]:
-        time.sleep(0.5)
+    except KeyboardInterrupt:
 
-    if done_flag["error"]:
-        print(Fore.RED + f"\n\n Error downloading model: {done_flag['error']}")
+        if f and not f.closed:
+            try:
+                f.close()
+            except Exception:
+                pass
+        
+        sys.stdout.write("\033[?25h")
+        sys.stdout.flush()
+        
+        if tmp_path.exists():
+            try:
+                os.remove(tmp_path)
+            except Exception:
+                pass
+
+        print(Fore.YELLOW + "\n [INFO] Download aborted by user. Temporary file purged successfully.")
+        os._exit(1)
+
+    except Exception as e:
+
+        if f and not f.closed:
+            try:
+                f.close()
+            except Exception:
+                pass
+                
+        sys.stdout.write("\033[?25h")
+        sys.stdout.flush()
+
+        if tmp_path.exists():
+            try:
+                os.remove(tmp_path)
+            except Exception:
+                pass
+        print(Fore.RED + f"\n\n Error downloading model: {e}")
         sys.exit(1)
-
-    print(Fore.GREEN + "\n\n Model downloaded successfully.\n")
 
 def get_repo_language(force_ask=False):
     """
     Checks if the language configuration exists for this repository.
-    If it doesn't exist or force_ask is True, it asks the user and saves it.
+    If it doesn't exist or force_ask is True, it asks the user safely and saves it.
     """
     if not force_ask:
         result = subprocess.run(
@@ -110,16 +136,23 @@ def get_repo_language(force_ask=False):
             return stored_lang
 
     print(Fore.CYAN + "\n  [gitai] Language configuration for this repository:")
-    while True:
-        choice = input(Fore.CYAN + "   [s] Spanish  [e] English  → ").strip().lower()
-        if choice == "s":
-            lang = "es"
-            break
-        elif choice == "e":
-            lang = "en"
-            break
-        else:
-            print(Fore.RED + "  Invalid option. Please select 's' or 'e'.")
+
+    try:
+        while True:
+            choice = input(Fore.CYAN + "   [s] Spanish   [e] English  → ").strip().lower()
+            if choice == "s":
+                lang = "es"
+                break
+            elif choice == "e":
+                lang = "en"
+                break
+            else:
+                print(Fore.RED + "   Invalid option. Please select 's' or 'e'.")
+    except KeyboardInterrupt:
+        sys.stdout.write("\033[?25h")
+        sys.stdout.flush()
+        print(Fore.YELLOW + "\n [INFO] Language selection cancelled. Exiting.")
+        sys.exit(0)
 
     subprocess.run(
         ["git", "config", "gitai.lang", lang],
