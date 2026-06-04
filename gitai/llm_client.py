@@ -363,7 +363,6 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
 
         global _inference_done
         _inference_done = True
-        time.sleep(0.25)
 
         if loading_thread and loading_thread.is_alive():
             loading_thread.join()
@@ -382,10 +381,42 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
 
         return commit_message
 
+    except KeyboardInterrupt:
+        _inference_done = True
+        
+        # Force the secondary thread to terminate immediately so that it does not step on the screen
+        if loading_thread and loading_thread.is_alive():
+            loading_thread.join()
+        
+        # Make sure to revive the cursor in case it was hidden in the bar
+        sys.stdout.write("\033[?25h")
+        sys.stdout.flush()
+        
+        if lang == "es":
+            print(Fore.YELLOW + "\n\n [INFO] Generación de mensaje cancelada por el usuario. Exiting.")
+        else:
+            print(Fore.YELLOW + "\n\n [INFO] Generation cancelled by user. Exiting.")
+            
+        sys.exit(0)
+
     except httpx.RequestError as exc:
+        # Make sure to clear the bar and reset the cursor if the connection fails abruptly
+        _inference_done = True
+        if loading_thread and loading_thread.is_alive():
+            loading_thread.join()
+        sys.stdout.write("\033[?25h")
+        sys.stdout.flush()
+
         # DIAGNOSIS: The actual technical error that HTTPX is experiencing is printed
         print(Fore.RED + f"\n [DEBUG CLIENT] Technical connection error: {exc}")
         raise RuntimeError(Fore.RED + " GitAI daemon is not running. Please start your session by running: gitai start") from exc
+        
     except Exception as e:
+        _inference_done = True
+        if loading_thread and loading_thread.is_alive():
+            loading_thread.join()
+        sys.stdout.write("\033[?25h")
+        sys.stdout.flush()
+
         print(Fore.RED + f"\n [DEBUG CLIENT] Another error: {e}")
         raise e

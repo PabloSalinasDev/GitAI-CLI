@@ -132,7 +132,7 @@ def main():
         return
 
     if args:
-        print(Fore.RED + f" Error: Unknown command '{args[0]}'.")
+        print(Fore.RED + f"\n Error: Unknown command '{args[0]}'.")
         print(Fore.CYAN + " Run 'gitai help' to see the list of available commands.\n")
         sys.exit(1)
 
@@ -181,7 +181,7 @@ def main():
                 print(" Cancelled.")
                 break
             else:
-                print(Fore.RED + " Invalid option. Use c, e or x.")
+                print(Fore.RED + "\n Invalid option. Use c, e or x.\n")
     except KeyboardInterrupt:
         print(Fore.YELLOW + "\n\n Operation cancelled by user. Exiting.")
         sys.exit(0)
