@@ -162,13 +162,10 @@ def main():
     except KeyboardInterrupt:
         sys.stdout.write("\033[?25h")
         sys.stdout.flush()
-        if lang == "es":
-            print(Fore.YELLOW + "\n [INFO] Operación cancelada por el usuario. Exiting.")
-        else:
-            print(Fore.YELLOW + "\n [INFO] Operation cancelled by user. Exiting.")
+        print(Fore.YELLOW + "\n [INFO] Operation cancelled by user. Exiting.")
         sys.exit(0)
     except Exception as e:
-        print(Fore.RED + f"\n [ERROR INESPERADO]: {e}")
+        print(Fore.RED + f"\n [ERROR]: {e}")
         sys.exit(1)
 
     if message is None:
