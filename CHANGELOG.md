@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-06-04
+
+### Added
+- Implemented explicit context awareness via a `warmup` flag in the LLM client to cleanly separate background cache priming from active user commit cycles.
+- Added visual terminal optimizations using ANSI escape sequences to hide the cursor during active downloads and guarantee its deterministic restoration upon exit.
+
+### Fixed
+- Resolved Windows filesystem locking issues by refactoring the weight downloader into a synchronous stream, ensuring absolute cleanup of `.tmp` files on user interruption.
+- Prevented background zombie processes (`llama_cpp.server`) from hanging in local RAM by overriding `SIGTERM` mechanics with atomic `.kill()` instructions and `os._exit()` upon terminal cancellations (`Ctrl+C`).
+- Fixed a critical `Pylint E0601 (used-before-assignment)` scope bug triggered by duplicate local imports within the exception handling blocks.
+- Isolated technical connection errors (`httpx.RequestError`) from general execution exceptions to provide cleaner console diagnostics when the daemon is offline.
+
+---
+
 ## [1.1.0] - 2026-06-03
 
 ### Added
