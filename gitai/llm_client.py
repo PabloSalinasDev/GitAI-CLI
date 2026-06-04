@@ -132,16 +132,20 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
 def start_daemon(lang="en"):
     """Starts the llama_cpp server as a silent background process using your optimized parameters."""
     global _daemon_process
+
     try:
-        res = httpx.get(f"http://localhost:{PORT}/v1/models")
+        res = httpx.get(f"http://localhost:{PORT}/v1/models", timeout=2.0)
         if res.status_code == 200:
-            print(Fore.CYAN + " GitAI server daemon is already running in the background.")
+            if lang == "es":
+                print(Fore.CYAN + " El servidor para GitAI ya está corriendo en segundo plano.")
+            else:
+                print(Fore.CYAN + " GitAI server daemon is already running in the background.")
             return
     except httpx.RequestError:
         pass
 
     print(Fore.CYAN + " Loading model into RAM... (Starting work session)")
-    
+
     cmd = [
         sys.executable, "-m", "llama_cpp.server",
         "--model", str(MODEL_PATH),
@@ -155,49 +159,81 @@ def start_daemon(lang="en"):
         "--use_mmap", "True",
         "--cache", "True"
     ]
-    
-    # WINDOWS CRITICAL FLAG: CREATE_NO_WINDOW (0x08000000)
-    # This tells Windows: "Run this in the background 100% invisible, 
-    # without opening extra CMD windows, but keeping the pipx virtual environment intact".
+
     creation_flags = 0x08000000
-    
-    # Use close_fds=True to completely unbind file descriptors from the current terminal
-    _daemon_process=subprocess.Popen(
+
+    # Launching invisible background thread
+    _daemon_process = subprocess.Popen(
         cmd, 
         stdout=subprocess.DEVNULL, 
         stderr=subprocess.DEVNULL, 
         creationflags=creation_flags,
         close_fds=True
     )
-    
+
     server_ready = False
-    for _ in range(60):
-        try:
-            time.sleep(1)
-            if httpx.get(f"http://localhost:{PORT}/v1/models").status_code == 200:
-                server_ready = True
-                break
-        except httpx.RequestError:
-            continue
-            
+
+    try:
+        for _ in range(60):
+            try:
+                time.sleep(1)
+                if httpx.get(f"http://localhost:{PORT}/v1/models", timeout=1.0).status_code == 200:
+                    server_ready = True
+                    break
+            except httpx.RequestError:
+                continue
+    except KeyboardInterrupt:
+        if _daemon_process:
+            _daemon_process.terminate()
+            _daemon_process.wait()
+
+        sys.stdout.write("\033[?25h")
+        sys.stdout.flush()
+        if lang == "es":
+            print(Fore.YELLOW + "\n [INFO] Arranque cancelado por el usuario. Proceso terminado y RAM liberada.")
+        else:
+            print(Fore.YELLOW + "\n [INFO] Startup cancelled by user. Process terminated and RAM cleared.")
+        sys.exit(0)
+
     if not server_ready:
         print(Fore.RED + " Error: Server daemon took too long to load into RAM.")
         return
 
-    # The prompt is forced to load at startup (Warm-up)
     print(Fore.CYAN + " Priming prompt cache and optimizing engine layers...\n")
     try:
-        # Minimum Plain Text Diff Dummy
         dummy_diff = "@@ -0,0 @@"
+
+        generate_commit_message(diff=dummy_diff, initial_commit=False, lang=lang, warmup=True)
         
-        # The original function is executed in the background. 
-        # This will take a few seconds to load in here, absorbing all the initial wait.
-        generate_commit_message(diff=dummy_diff, initial_commit=False, lang=lang)
-        
-        print(Fore.GREEN + " Work session initialized. GitAI is hot and ready in the background!")
+        if lang == "es":
+            print(Fore.GREEN + " ¡Sesión de trabajo inicializada! GitAI está listo para operar.")
+        else:
+            print(Fore.GREEN + " Work session initialized. GitAI is hot and ready in the background!")
+
+    except KeyboardInterrupt:
+
+        if _daemon_process:
+            try:
+                _daemon_process.kill()  # Force immediate shutdown at the operating system level
+                _daemon_process.wait()  # Ensure the release of resources in RAM
+            except Exception:
+                pass
+
+        sys.stdout.write("\033[?25h")
+        sys.stdout.flush()
+
+        if lang == "es":
+            print(Fore.YELLOW + "\n [INFO] Operación abortada bruscamente durante la optimización. Servidor purgado de la RAM.")
+        else:
+            print(Fore.YELLOW + "\n [INFO] Operation hard-aborted during optimization. Server purged from RAM.")
+
+        os._exit(1)
+
     except Exception:
-        # If for some reason the warm-up fails, do not abort the server boot
-        print(Fore.GREEN + " Work session initialized. GitAI is running (cache priming skipped).")
+        if lang == "es":
+            print(Fore.GREEN + " Sesión inicializada. GitAI está corriendo (optimización omitida).")
+        else:
+            print(Fore.GREEN + " Work session initialized. GitAI is running (cache priming skipped).")
 
 def stop_daemon():
     """Finds the background server process and terminates it to free memory."""
@@ -221,7 +257,7 @@ def stop_daemon():
     except ImportError:
         print(Fore.CYAN + " The 'psutil' library is required to terminate the session. Please install it with: pip install psutil")
 
-def generate_commit_message(diff, initial_commit=False, lang="en"):
+def generate_commit_message(diff, initial_commit=False, lang="en", warmup=False):
     """Generates the commit message by communicating via HTTP with the background daemon."""
     
     try:
@@ -393,11 +429,14 @@ def generate_commit_message(diff, initial_commit=False, lang="en"):
         sys.stdout.flush()
         
         if lang == "es":
-            print(Fore.YELLOW + "\n\n [INFO] Generación de mensaje cancelada por el usuario. Exiting.")
+            print(Fore.YELLOW + " [INFO] Generación de mensaje cancelada por el usuario. Exiting.")
         else:
-            print(Fore.YELLOW + "\n\n [INFO] Generation cancelled by user. Exiting.")
+            print(Fore.YELLOW + " [INFO] Generation cancelled by user. Exiting.")
             
-        sys.exit(0)
+        if warmup:
+            raise KeyboardInterrupt
+        else:
+            sys.exit(0)
 
     except httpx.RequestError as exc:
         # Make sure to clear the bar and reset the cursor if the connection fails abruptly

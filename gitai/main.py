@@ -150,9 +150,25 @@ def main():
         sys.exit(0)
 
     try:
-        message = generate_commit_message(context, initial_commit=initial, lang=lang)
+        message = generate_commit_message(
+            context, 
+            initial_commit=initial, 
+            lang=lang, 
+            warmup=False
+        )
+    except RuntimeError as run_err:
+        print(Fore.RED + f"\n{run_err}")
+        sys.exit(1)
+    except KeyboardInterrupt:
+        sys.stdout.write("\033[?25h")
+        sys.stdout.flush()
+        if lang == "es":
+            print(Fore.YELLOW + "\n [INFO] Operación cancelada por el usuario. Exiting.")
+        else:
+            print(Fore.YELLOW + "\n [INFO] Operation cancelled by user. Exiting.")
+        sys.exit(0)
     except Exception as e:
-        print(f"\n{e}")
+        print(Fore.RED + f"\n [ERROR INESPERADO]: {e}")
         sys.exit(1)
 
     if message is None:
@@ -183,7 +199,7 @@ def main():
             else:
                 print(Fore.RED + "\n Invalid option. Use c, e or x.\n")
     except KeyboardInterrupt:
-        print(Fore.YELLOW + "\n\n Operation cancelled by user. Exiting.")
+        print(Fore.YELLOW + "\n Operation cancelled by user. Exiting.")
         sys.exit(0)
 
 if __name__ == "__main__":
