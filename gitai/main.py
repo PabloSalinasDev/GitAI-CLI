@@ -163,24 +163,28 @@ def main():
     print(Fore.CYAN + "└─────────────────────────────────────────────┘")
     print(Fore.GREEN + f"\n {message}\n")
 
-    while True:
-        choice = input(Fore.CYAN + " [c] Confirm  [e] Edit  [x] Cancel  → ").strip().lower()
+    try:
+        while True:
+            choice = input(Fore.CYAN + " [c] Confirm  [e] Edit  [x] Cancel  → ").strip().lower()
 
-        if choice == "c":
-            run_commit(message)
-            break
-        elif choice == "e":
-            edited = input(Fore.CYAN + " Enter your message: ").strip()
-            if edited:
-                run_commit(edited)
+            if choice == "c":
+                run_commit(message)
+                break
+            elif choice == "e":
+                edited = input(Fore.CYAN + " Enter your message: ").strip()
+                if edited:
+                    run_commit(edited)
+                else:
+                    print(" Empty message. Cancelled.")
+                break
+            elif choice == "x":
+                print(" Cancelled.")
+                break
             else:
-                print(" Empty message. Cancelled.")
-            break
-        elif choice == "x":
-            print(" Cancelled.")
-            break
-        else:
-            print(Fore.RED + " Invalid option. Use c, e or x.")
+                print(Fore.RED + " Invalid option. Use c, e or x.")
+    except KeyboardInterrupt:
+        print(Fore.YELLOW + "\n\n Operation cancelled by user. Exiting.")
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()
