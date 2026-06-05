@@ -83,8 +83,8 @@ def run_commit(message):
 def print_help():
     """Print the user manual integrated directly into the terminal with web access."""
     print(Fore.CYAN + "═"*74)
-    print(Fore.CYAN + "        GitAI CLI - Offline Privacy-First Commit Generator")
-    print(Fore.CYAN + "            Developed by PyBloSoft © 2026 - Ver. 1.2.0")
+    print(Fore.CYAN + "         GitAI CLI - Offline Privacy-First Commit Generator")
+    print(Fore.CYAN + "             Developed by PyBloSoft © 2026 - Ver. 1.3.0")
     print(Fore.CYAN + "═"*74)
     print("Usage:")
     print(f"  gitai         {Style.DIM}Analyze staged changes and generate a conventional commit.{Style.RESET_ALL}")
