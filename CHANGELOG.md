@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-06-05
+
+### Changed
+- `start_daemon` now returns early if the server is already running instead of continuing execution
+- Split `subprocess.Popen` launch by OS: `CREATE_NO_WINDOW` on Windows, `prctl(PR_SET_PDEATHSIG)` on Linux for automatic child cleanup on parent death
+- Replaced `sys.platform` direct comparison with a local `platform` variable to avoid Pylance unreachable code warnings
+
+### Added
+- `_set_pdeathsig()`: Linux-only helper that signals the server process to terminate when the parent dies
+- `atexit` cleanup handler to free RAM on clean exits across all platforms
+- Reminder message to run `gitai out` before closing the terminal on platforms where automatic cleanup is not guaranteed
+
+---
+
 ## [1.2.0] - 2026-06-04
 
 ### Added
