@@ -4,11 +4,13 @@ import os
 import time
 import re
 import subprocess
+import ctypes
 import psutil
 import threading
 from colorama import init, Fore, Style
 
 from gitai.config import MODEL_PATH, PORT
+import __main__
 
 init(autoreset=True)
 
@@ -129,6 +131,18 @@ def clean_git_diff(raw_diff, max_estimated=2500, debug=True):
 
     return filtered_diff, loading_thread
 
+def _set_pdeathsig():
+    """Executed in the child process (Linux only).
+    The child receives SIGTERM when the parent dies."""
+    try:
+        libc = ctypes.CDLL("libc.so.6", use_errno=True)
+        PR_SET_PDEATHSIG = 1
+        SIGTERM = 15
+        libc.prctl(PR_SET_PDEATHSIG, SIGTERM, 0, 0, 0)
+    except Exception:
+        pass
+
+
 def start_daemon(lang="en"):
     """Starts the llama_cpp server as a silent background process using your optimized parameters."""
     global _daemon_process
@@ -137,7 +151,7 @@ def start_daemon(lang="en"):
         res = httpx.get(f"http://localhost:{PORT}/v1/models", timeout=2.0)
         if res.status_code == 200:
             print(Fore.CYAN + " GitAI server daemon is already running in the background.")
-
+            return
     except httpx.RequestError:
         pass
 
@@ -157,19 +171,38 @@ def start_daemon(lang="en"):
         "--cache", "True"
     ]
 
-    creation_flags = 0x08000000
+    platform = sys.platform
 
-    # Launching invisible background thread
-    _daemon_process = subprocess.Popen(
-        cmd, 
-        stdout=subprocess.DEVNULL, 
-        stderr=subprocess.DEVNULL, 
-        creationflags=creation_flags,
-        close_fds=True
-    )
+    if platform == "win32":
+        # Launching invisible background process
+        _daemon_process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=0x08000000,  # CREATE_NO_WINDOW
+            close_fds=True
+        )
+
+    elif platform.startswith("linux"):
+        # Child receives SIGTERM when parent dies
+        _daemon_process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            preexec_fn=_set_pdeathsig,  # pylint: disable=subprocess-popen-preexec-fn
+            close_fds=True
+        )
+
+    else:
+        # macOS and others: run gitai out before closing the terminal to free RAM
+        _daemon_process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            close_fds=True
+        )
 
     server_ready = False
-
     try:
         for _ in range(60):
             try:
@@ -183,7 +216,6 @@ def start_daemon(lang="en"):
         if _daemon_process:
             _daemon_process.terminate()
             _daemon_process.wait()
-
         sys.stdout.write("\033[?25h")
         sys.stdout.flush()
         print(Fore.YELLOW + "\n [INFO] Startup cancelled by user. Process terminated and RAM cleared.")
@@ -194,42 +226,44 @@ def start_daemon(lang="en"):
         return
 
     print(Fore.CYAN + " Priming prompt cache and optimizing engine layers...\n")
+
     try:
         dummy_diff = "@@ -0,0 @@"
-
         generate_commit_message(diff=dummy_diff, initial_commit=False, lang=lang, warmup=True)
-
         print(Fore.GREEN + " Work session initialized. GitAI is hot and ready in the background!")
-
+        print(Fore.YELLOW + " Remember to run 'gitai out' before closing the terminal to free RAM.")
     except KeyboardInterrupt:
-
         if _daemon_process:
             try:
                 _daemon_process.kill()  # Force immediate shutdown at the operating system level
                 _daemon_process.wait()  # Ensure the release of resources in RAM
             except Exception:
                 pass
-
         sys.stdout.write("\033[?25h")
         sys.stdout.flush()
-        print(Fore.YELLOW + "\n [INFO] Operation hard-aborted during optimization. Server purged from RAM.")
         os._exit(1)
-
     except Exception:
         print(Fore.GREEN + " Work session initialized. GitAI is running (cache priming skipped).")
+        print(Fore.YELLOW + " Remember to run 'gitai out' before closing the terminal to free RAM.")
 
 def stop_daemon():
     """Finds the background server process and terminates it to free memory."""
     global _daemon_process
-    
+
     if _daemon_process:
         try:
             _daemon_process.terminate()
-            _daemon_process.wait(timeout=3)
+            try:
+                _daemon_process.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                _daemon_process.kill()  # Force kill if terminate() hangs
+                _daemon_process.wait()
             _daemon_process = None
+            print(Fore.GREEN + " Session closed successfully. RAM cleared.")
             return
         except Exception:
             pass
+
     try:
         for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
             if proc.info['cmdline'] and "llama_cpp.server" in " ".join(proc.info['cmdline']):
