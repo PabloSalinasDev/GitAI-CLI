@@ -185,9 +185,9 @@ Based on extensive stress-testing on standard consumer hardware (e.g., Intel i7 
 
 | Hardware Profile | Context Size | Estimated Time * | Commit Accuracy |
 |------------------|--------------|------------------|-----------------|
-| **Modern Desktop / Laptop**<br>*(Ryzen 5/7, Core i5/i7 11th+ Gen, DDR5)* | Small to Large Diffs | **~8 – 20 seconds** | ~98% |
-| **Older / Standard Hardware**<br>*(Legacy Intel i7, DDR4 @ 2400MHz)* | Small to Medium Diffs | **~20 – 40 seconds** | ~98% |
-| **Stress Test / Massive Changes**<br>*(Legacy Hardware + Dense Diffs)* | Large Multi-file Diffs | **~40 – 70 seconds** | ~98% |
+| **Modern Desktop / Laptop**<br>*(Ryzen 5/7, Core i5/i7 11th+ Gen, DDR5)* | Small to Large Diffs | **~8 – 20 seconds** | ~90% |
+| **Older / Standard Hardware**<br>*(Legacy Intel i7, DDR4 @ 2400MHz)* | Small to Medium Diffs | **~20 – 40 seconds** | ~90% |
+| **Stress Test / Massive Changes**<br>*(Legacy Hardware + Dense Diffs)* | Large Multi-file Diffs | **~40 – 70 seconds** | ~85% |
 
 > **Note on Performance:** Times are heavily bound to RAM clock speed and single-core efficiency. A dense, multi-file diff analyzed on legacy hardware might occasionally touch the upper boundary of the stress test zone. However, GitAI's built-in traffic manager ensures payloads remain strictly bounded to keep local execution controlled and predictable.
 

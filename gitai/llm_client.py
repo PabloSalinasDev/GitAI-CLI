@@ -10,7 +10,6 @@ import threading
 from colorama import init, Fore, Style
 
 from gitai.config import MODEL_PATH, PORT
-import __main__
 
 init(autoreset=True)
 
