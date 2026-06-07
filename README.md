@@ -197,7 +197,7 @@ Based on extensive stress-testing on standard consumer hardware (e.g., Intel i7 
 
 Why are these times so consistent? GitAI does not just dump raw data into the LLM. It includes a custom pre-processing pipeline that strips out compiler noise, binary files, white spaces, and structural brackets before sending the payload. 
 
-* **Linear vs. Deductive Processing:** Testing proved that sending a complete, clean code block up to 2500 characters is significantly faster than truncating it too early. By providing the model with full, clean context, the LLM processes the data linearly instead of wasting CPU cycles trying to "guess" missing code structures. This balance cuts down processing overhead by up to 30 seconds on older machines while boosting commit accuracy to a staggering **98%**.
+* **Linear vs. Deductive Processing:** Testing proved that sending a complete, clean code block up to 2500 characters is significantly faster than truncating it too early. By providing the model with full, clean context, the LLM processes the data linearly instead of wasting CPU cycles trying to "guess" missing code structures. This balance cuts down processing overhead by up to 40 seconds on older machines while boosting commit accuracy to a staggering **85%**.
 
 ## Dependencies
 
