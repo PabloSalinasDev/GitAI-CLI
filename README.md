@@ -43,7 +43,7 @@ The benefit of implementing this CLI is twofold:
 3. After staging changes, run `gitai`. It feeds the diff (or initial commit context) into the model and proposes a commit message.
 4. At the end of your session, run `gitai out` to stop the daemon and free RAM.
 
-### 📖 Interactive Help & Documentation Access
+### Interactive Help & Documentation Access
 
 GitAI CLI features a native, robust command-line validation and help module. If you ever need a quick reminder of the available architecture commands, explicit routing links, or want to report a technical issue, you can invoke the user manual directly from your shell.
 
@@ -207,6 +207,22 @@ Why are these times so consistent? GitAI does not just dump raw data into the LL
 | httpx | Download the model and communicate with the daemon |
 | psutil | Stop the background daemon (`gitai out`) |
 | colorama | Handle cross-platform terminal text colorization and visual hierarchy |
+
+---
+
+## Uninstallation
+
+To completely remove GitAI and delete the downloaded local model weights (~4.7 GB):
+
+```bash
+# 1. Delete the local model cache
+Remove-Item -Recurse -Force "$env:LOCALAPPDATA\gitai"   # Windows
+
+# 2. Uninstall the package
+pipx uninstall gitai-local    # If installed via pipx (README instructions)
+# or
+pip uninstall gitai-local     # If installed via standard pip (PyPI default)
+```
 
 ---
 
