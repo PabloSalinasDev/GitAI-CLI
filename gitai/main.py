@@ -7,6 +7,18 @@ from gitai.llm_client import start_daemon, stop_daemon, generate_commit_message
 
 init(autoreset=True)
 
+def is_git_repo():
+    result = subprocess.run(
+        ["git", "rev-parse", "--is-inside-work-tree"],
+        capture_output=True,
+        text=True,
+        check=False,
+        encoding="utf-8",
+        errors="replace",
+        env=get_secure_env()
+    )
+    return result.returncode == 0
+
 def is_initial_commit():
     result = subprocess.run(
         ["git", "rev-parse", "HEAD"],
@@ -109,6 +121,10 @@ def main():
 
     # 2. START LOGICAL DAY: gitai start (Check local language and raise the model)
     if args and args[0] == "start":
+        if not is_git_repo():
+            print(Fore.RED + " Error: this directory is not a git repository.")
+            print(Fore.CYAN + " Run 'git init' first.")
+            return
         if not model_exists():
             print(Fore.CYAN + " Model file not found. Run 'gitai init' first to download it.")
             return
