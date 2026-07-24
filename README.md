@@ -210,6 +210,17 @@ Why are these times so consistent? GitAI does not just dump raw data into the LL
 
 ---
 
+## Privacy & Security
+
+GitAI is designed with a strict privacy-first architecture:
+
+* **100% Local Execution:** All prompt processing and commit analysis run entirely on your local CPU/GPU using `llama.cpp` bindings.
+* **Zero Telemetry:** The CLI collects no analytics, logs, or usage metrics.
+* **Air-Gapped Friendly:** Once the GGUF model is downloaded, no internet connection is required to generate commits or run commands.
+* **No Code Exposure:** Your repository diffs and code never leave your machine or hit external APIs.
+
+---
+
 ## Uninstallation
 
 To completely remove GitAI and delete the downloaded local model weights (~4.7 GB):
