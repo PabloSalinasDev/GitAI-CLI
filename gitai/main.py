@@ -94,21 +94,27 @@ def run_commit(message):
 
 def print_help():
     """Print the user manual integrated directly into the terminal with web access."""
-    print(Fore.CYAN + "═"*74)
-    print(Fore.CYAN + "         GitAI CLI - Offline Privacy-First Commit Generator")
-    print(Fore.CYAN + "             Developed by PyBloSoft © 2026 - Ver. 1.3.0")
-    print(Fore.CYAN + "═"*74)
+    print("\n")
+    print(Fore.CYAN + "═"*86)
+    print(Fore.CYAN + "                 GitAI CLI - Offline Privacy-First Commit Generator")
+    print(Fore.CYAN + "                     Developed by PyBloSoft © 2026 - Ver. 1.3.1")
+    print(Fore.CYAN + "═"*86)
     print("Usage:")
     print(f"  gitai         {Style.DIM}Analyze staged changes and generate a conventional commit.{Style.RESET_ALL}")
     print(f"  gitai init    {Style.DIM}Download and configure the local LLM engine weights.{Style.RESET_ALL}")
     print(f"  gitai start   {Style.DIM}Launch the background daemon and prime the prompt cache.{Style.RESET_ALL}")
     print(f"  gitai out     {Style.DIM}Stop the background daemon session and free system RAM.{Style.RESET_ALL}")
     print(f"  gitai help    {Style.DIM}Show this user manual screen.{Style.RESET_ALL}")
-    print(Fore.CYAN + "─"*74)
+    print(Fore.CYAN + "─"*86)
+    print("Privacy & Security Guarantees:")
+    print(f"  • {Fore.GREEN}100% Local Inference:{Style.RESET_ALL} Runs entirely on your CPU/RAM using local GGUF weights.")
+    print(f"  • {Fore.GREEN}Zero Telemetry:{Style.RESET_ALL} No internet connection required, no tracking, no data collection.")
+    print(f"  • {Fore.GREEN}Air-Gapped Ready:{Style.RESET_ALL} Your source code and diffs never leave this machine.")
+    print(Fore.CYAN + "─"*86)
     print("Links & Support:")
     print(f"  • Documentation:  {Fore.BLUE}https://github.com/PabloSalinasDev/GitAI-CLI#readme{Style.RESET_ALL}")
     print(f"  • Report an Issue: {Fore.BLUE}https://github.com/PabloSalinasDev/GitAI-CLI/issues{Style.RESET_ALL}")
-    print(Fore.CYAN + "═"*74 + "\n")
+    print(Fore.CYAN + "═"*86 + "\n")
 
 def main():
     args = sys.argv[1:]
