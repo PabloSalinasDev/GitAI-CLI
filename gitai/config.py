@@ -33,7 +33,7 @@ def ensure_model():
     print(Fore.CYAN + "│   GitAI - First run: downloading AI model   │")
     print(Fore.CYAN + "│      AI Model Setup - one time only         │")
     print(Fore.CYAN + "│                                             │")
-    print(Fore.CYAN + "│ Developed by PyBloSoft © 2026 - Ver. 1.3.1  │")
+    print(Fore.CYAN + "│ Developed by PyBloSoft © 2026 - Ver. 1.3.2  │")
     print(Fore.CYAN + "└─────────────────────────────────────────────┘\n")
 
     MODEL_DIR.mkdir(parents=True, exist_ok=True)

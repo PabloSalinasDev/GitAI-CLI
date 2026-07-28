@@ -97,7 +97,7 @@ def print_help():
 
     print(Fore.CYAN + "═"*86)
     print(Fore.CYAN + "                 GitAI CLI - Offline Privacy-First Commit Generator")
-    print(Fore.CYAN + "                     Developed by PyBloSoft © 2026 - Ver. 1.3.1")
+    print(Fore.CYAN + "                     Developed by PyBloSoft © 2026 - Ver. 1.3.2")
     print(Fore.CYAN + "═"*86)
     print("Usage:")
     print(f"  gitai         {Style.DIM}Analyze staged changes and generate a conventional commit.{Style.RESET_ALL}")
