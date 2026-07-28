@@ -53,7 +53,6 @@ def ensure_model():
         filled = int(bar_len * pct)
         bar = "█" * filled + "░" * (bar_len - filled)
         
-        # \r moves to line start; \033[K clears from cursor to end of line
         line = f"\r\033[K[{bar}] {pct*100:.1f}%  {d_gb:.2f}/{t_gb:.2f} GB"
         sys.stdout.write(Fore.YELLOW + line + Style.RESET_ALL)
         sys.stdout.flush()
