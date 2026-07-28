@@ -50,25 +50,28 @@ def ensure_model():
 
     def print_progress(pct, d_gb, t_gb):
         bar_len = 30
-        filled  = int(bar_len * pct)
-        bar     = Fore.YELLOW + "█" * filled + Style.DIM + "░" * (bar_len - filled)
-        print(Fore.YELLOW + f"\r[{bar}" + Style.RESET_ALL + Fore.YELLOW + f"] {pct*100:.1f}%  {d_gb:.2f}/{t_gb:.2f} GB", end="", flush=True)
+        filled = int(bar_len * pct)
+        bar = "█" * filled + "░" * (bar_len - filled)
+        
+        # \r moves to line start; \033[K clears from cursor to end of line
+        line = f"\r\033[K[{bar}] {pct*100:.1f}%  {d_gb:.2f}/{t_gb:.2f} GB"
+        sys.stdout.write(Fore.YELLOW + line + Style.RESET_ALL)
+        sys.stdout.flush()
 
-    f = None
     try:
         with open(tmp_path, "wb") as f:
             with httpx.stream("GET", MODEL_URL, follow_redirects=True, timeout=None) as r:
                 r.raise_for_status()
-                total      = int(r.headers.get("content-length", 0))
+                total = int(r.headers.get("content-length", 0))
                 downloaded = 0
 
                 for chunk in r.iter_bytes(chunk_size=1024 * 256):
                     f.write(chunk)
                     downloaded += len(chunk)
                     if total:
-                        pct  = downloaded / total
+                        pct = downloaded / total
                         d_gb = downloaded / 1_073_741_824
-                        t_gb = total      / 1_073_741_824
+                        t_gb = total / 1_073_741_824
                         print_progress(pct, d_gb, t_gb)
 
         sys.stdout.write("\033[?25h")
@@ -78,13 +81,6 @@ def ensure_model():
         print(Fore.GREEN + "\n\n Model downloaded successfully.\n")
 
     except KeyboardInterrupt:
-
-        if f and not f.closed:
-            try:
-                f.close()
-            except Exception:
-                pass
-        
         sys.stdout.write("\033[?25h")
         sys.stdout.flush()
         
@@ -98,13 +94,6 @@ def ensure_model():
         os._exit(1)
 
     except Exception as e:
-
-        if f and not f.closed:
-            try:
-                f.close()
-            except Exception:
-                pass
-                
         sys.stdout.write("\033[?25h")
         sys.stdout.flush()
 
